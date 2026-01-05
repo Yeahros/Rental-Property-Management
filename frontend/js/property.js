@@ -153,13 +153,13 @@
 
     // Render nhà trọ theo trang
     function renderHousesPage() {
-        const container = document.getElementById('house-tabs-container');
-        container.innerHTML = ''; // Xóa nội dung cũ
+            const container = document.getElementById('house-tabs-container');
+            container.innerHTML = ''; // Xóa nội dung cũ
 
         if (allHouses.length === 0) {
-            container.innerHTML = '<span style="font-size:0.9rem; color:#666">Chưa có nhà nào. Hãy tạo mới!</span>';
+                container.innerHTML = '<span style="font-size:0.9rem; color:#666">Chưa có nhà nào. Hãy tạo mới!</span>';
             document.getElementById('active-house-card').style.display = 'none';
-            currentHouseId = null;
+                currentHouseId = null;
             return;
         }
 
@@ -175,7 +175,7 @@
         if (activeHouse) {
             document.getElementById('active-house-card').style.display = 'block';
             displayActiveHouse(activeHouse); // Async function
-        } else {
+            } else {
             document.getElementById('active-house-card').style.display = 'none';
         }
 
@@ -242,11 +242,11 @@
         houseIcon.appendChild(nameSpan);
         
         houseIcon.onclick = () => {
-            currentHouseId = house.house_id;
+                        currentHouseId = house.house_id;
             currentHousesPage = 0; // Reset về trang đầu khi chọn nhà mới
             renderHousesPage(); // Render lại để nhà mới lên card lớn
-            loadRooms(currentHouseId); // Load phòng tương ứng
-        };
+                        loadRooms(currentHouseId); // Load phòng tương ứng
+                    };
         
         return houseIcon;
     }
@@ -287,12 +287,12 @@
         addHouseIcon.appendChild(addNameSpan);
         
         addHouseIcon.onclick = () => {
-            // Reset form nhà khi mở mới
-            document.getElementById('form-house').reset();
-            document.getElementById('service-list-house').innerHTML = '';
-            addServiceRow('house'); // Thêm 1 dòng trống
-            openModal('modal-house');
-        };
+                // Reset form nhà khi mở mới
+                document.getElementById('form-house').reset();
+                document.getElementById('service-list-house').innerHTML = '';
+                addServiceRow('house'); // Thêm 1 dòng trống
+                openModal('modal-house');
+            };
         
         return addHouseIcon;
     }
@@ -359,15 +359,15 @@
 
     // Render phòng theo trang
     function renderRoomsPage() {
-        const container = document.getElementById('rooms-container');
-        container.innerHTML = '';
+            const container = document.getElementById('rooms-container');
+            container.innerHTML = '';
 
         if (allRooms.length === 0) {
-            container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:2rem; color:#888; border:1px dashed #ddd; border-radius:8px;">Nhà này chưa có phòng nào. Hãy ấn nút "Thêm Phòng".</div>';
+                container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:2rem; color:#888; border:1px dashed #ddd; border-radius:8px;">Nhà này chưa có phòng nào. Hãy ấn nút "Thêm Phòng".</div>';
             document.getElementById('rooms-next-btn').style.display = 'none';
             document.getElementById('rooms-prev-btn').style.display = 'none';
-            return;
-        }
+                return;
+            }
 
         // Tính toán phòng hiển thị trong trang hiện tại
         const startIndex = currentRoomsPage * roomsPerPage;
@@ -376,49 +376,49 @@
 
         // Render các phòng
         roomsToShow.forEach(room => {
-            let statusBadge, tenantHtml, statusBarClass;
+                let statusBadge, tenantHtml, statusBarClass;
 
-            if (room.status === 'Occupied') {
-                statusBadge = `<span class="badge occupied">Đã thuê</span>`;
-                statusBarClass = 'green';
-                const tName = room.tenant_name || 'Khách';
-                tenantHtml = `
-                    <div class="tenant-info">
-                        <div class="tenant-avatar blue">${tName.substring(0,2).toUpperCase()}</div>
-                        <div class="tenant-details">
-                            <p class="name">${tName}</p>
-                            <p class="date">HĐ đến: ${room.contract_end_date ? new Date(room.contract_end_date).toLocaleDateString('vi-VN') : '?'}</p>
-                        </div>
-                    </div>`;
-            } else {
-                statusBadge = `<span class="badge vacant">Còn trống</span>`;
-                statusBarClass = 'red';
-                tenantHtml = `<div class="empty-state">Sẵn sàng cho thuê</div>`;
-            }
-
-            const html = `
-            <div class="room-card" onclick="viewRoomDetail(${room.room_id})" style="cursor: pointer;">
-                <div class="card-body">
-                    <div class="card-header">
-                        <div>
-                            <h4 class="room-name">Phòng ${room.room_number}</h4>
-                            <div class="room-meta">
-                                <span><i class="fas fa-layer-group"></i> Tầng ${room.floor}</span> • 
-                                <span>${room.area_m2} m²</span>
+                if (room.status === 'Occupied') {
+                    statusBadge = `<span class="badge occupied">Đã thuê</span>`;
+                    statusBarClass = 'green';
+                    const tName = room.tenant_name || 'Khách';
+                    tenantHtml = `
+                        <div class="tenant-info">
+                            <div class="tenant-avatar blue">${tName.substring(0,2).toUpperCase()}</div>
+                            <div class="tenant-details">
+                                <p class="name">${tName}</p>
+                                <p class="date">HĐ đến: ${room.contract_end_date ? new Date(room.contract_end_date).toLocaleDateString('vi-VN') : '?'}</p>
                             </div>
+                        </div>`;
+                } else {
+                    statusBadge = `<span class="badge vacant">Còn trống</span>`;
+                    statusBarClass = 'red';
+                    tenantHtml = `<div class="empty-state">Sẵn sàng cho thuê</div>`;
+                }
+
+                const html = `
+            <div class="room-card" onclick="viewRoomDetail(${room.room_id})" style="cursor: pointer;">
+                    <div class="card-body">
+                        <div class="card-header">
+                            <div>
+                                <h4 class="room-name">Phòng ${room.room_number}</h4>
+                                <div class="room-meta">
+                                    <span><i class="fas fa-layer-group"></i> Tầng ${room.floor}</span> • 
+                                    <span>${room.area_m2} m²</span>
+                                </div>
+                            </div>
+                            ${statusBadge}
                         </div>
-                        ${statusBadge}
+                        ${tenantHtml}
+                        <div class="card-footer-info">
+                            <span class="price-label">Giá thuê</span>
+                            <span class="price-value">${formatCurrency(room.base_rent)}<span style="font-size:0.75rem; color:#6B7280; font-weight:400">/tháng</span></span>
+                        </div>
                     </div>
-                    ${tenantHtml}
-                    <div class="card-footer-info">
-                        <span class="price-label">Giá thuê</span>
-                        <span class="price-value">${formatCurrency(room.base_rent)}<span style="font-size:0.75rem; color:#6B7280; font-weight:400">/tháng</span></span>
-                    </div>
-                </div>
-                <div class="status-bar ${statusBarClass}"></div>
-            </div>`;
-            container.insertAdjacentHTML('beforeend', html);
-        });
+                    <div class="status-bar ${statusBarClass}"></div>
+                </div>`;
+                container.insertAdjacentHTML('beforeend', html);
+            });
 
         // Hiển thị/ẩn nút mũi tên
         updateRoomsNavigation();

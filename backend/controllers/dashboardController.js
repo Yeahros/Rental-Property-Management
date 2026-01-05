@@ -41,20 +41,20 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
-// Biểu đồ doanh thu 6 tháng gần nhất
+// Biểu đồ doanh thu
 const getDashboardChart = async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT 
-                DATE_FORMAT(paid_date, '%m/%Y') as month_year,
-                SUM(total_amount) as total
+            SELECT MONTH(paid_date) AS month, SUM(total_amount) AS total 
             FROM invoices 
             WHERE status = 'Paid' 
-            AND paid_date >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-            GROUP BY month_year
-            ORDER BY paid_date ASC
+              AND YEAR(paid_date) = YEAR(CURRENT_DATE()) 
+            GROUP BY MONTH(paid_date) 
+            ORDER BY MONTH(paid_date)
         `);
-        res.json(rows);
+        const months = Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: 0 }));
+        rows.forEach(row => { if (row.month >= 1 && row.month <= 12) months[row.month - 1].total = row.total; });
+        res.json(months);
     } catch (err) {
         res.status(500).send(err.message);
     }
@@ -133,11 +133,56 @@ const getTopProperties = async (req, res) => {
     }
 };
 
+// Mức sử dụng điện/nước (6 tháng gần nhất)
+const getUsageChart = async (req, res) => {
+    try {
+        const { type } = req.query; // 'electricity' hoặc 'water'
+        const serviceType = type === 'water' ? 'Water' : 'Electricity';
+        
+        // Lấy dữ liệu từ service_details
+        const [rows] = await pool.query(`
+            SELECT 
+                MONTH(i.issue_date) AS month,
+                SUM(GREATEST(sd.current_reading - COALESCE(sd.previous_reading, 0), 0)) AS usage
+            FROM service_details sd
+            JOIN invoices i ON sd.invoice_id = i.invoice_id
+            WHERE sd.service_type = ?
+              AND YEAR(i.issue_date) = YEAR(CURRENT_DATE())
+              AND sd.current_reading IS NOT NULL
+            GROUP BY MONTH(i.issue_date)
+            ORDER BY MONTH(i.issue_date) DESC
+            LIMIT 6
+        `, [serviceType]);
+        
+        // Chuẩn hóa thành 6 tháng gần nhất (T7-T12)
+        const months = [];
+        const currentMonth = new Date().getMonth() + 1;
+        
+        // Tính 6 tháng gần nhất (từ tháng hiện tại trở về trước)
+        for (let i = 5; i >= 0; i--) {
+            let month = currentMonth - i;
+            if (month <= 0) month += 12;
+            
+            const data = rows.find(r => r.month === month);
+            months.push({
+                month: month,
+                usage: data ? parseFloat(data.usage) || 0 : 0
+            });
+        }
+        
+        res.json(months);
+    } catch (err) {
+        console.error('Usage Chart Error:', err);
+        res.status(500).send(err.message);
+    }
+};
+
 module.exports = {
     getDashboardStats,
     getDashboardChart,
     getUpcomingPayments,
     getDashboardActivities,
-    getTopProperties
+    getTopProperties,
+    getUsageChart
 };
 

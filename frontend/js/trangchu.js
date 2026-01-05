@@ -25,59 +25,72 @@ async function loadDashboard() {
         const res = await fetch(`${API_URL}/dashboard/stats`);
         const data = await res.json();
         
-        // Cập nhật DOM (Dựa theo thứ tự card trong HTML của bạn nếu không có ID, hoặc thêm ID vào HTML để chính xác hơn)
         const statValues = document.querySelectorAll('.stat-value');
         const statNotes = document.querySelectorAll('.stat-note');
 
-        if(statValues.length >= 4) {
+        if(statValues.length >= 3) {
             // Card 1: Tổng Bất động sản
             statValues[0].innerText = data.total_houses;
             
-            // Card 2: Tỷ lệ lấp đầy
-            statValues[1].innerText = data.occupancy_rate + '%';
-            statNotes[0].innerText = `${data.occupied_count} trên ${data.total_rooms} phòng đã thuê`;
+            // Card 2: Doanh thu hàng tháng
+            const revenueText = formatMoney(data.revenue_month);
+            statValues[1].innerText = revenueText;
+            if(statNotes.length > 0) {
+                statNotes[0].innerText = 'Doanh thu thực tế tháng này';
+            }
 
-            // Card 3: Doanh thu
-            statValues[2].innerText = formatMoney(data.revenue_month);
-            statNotes[1].innerText = 'Doanh thu thực tế tháng này';
-
-            // Card 4: Bảo trì
-            statValues[3].innerText = data.maintenance_active;
-            statNotes[2].innerText = `${data.maintenance_processing} đang xử lý`;
+            // Card 3: Bảo trì
+            statValues[2].innerText = data.maintenance_active;
+            if(statNotes.length > 1) {
+                statNotes[1].innerText = `${data.maintenance_processing} đang xử lý, ${data.maintenance_active - data.maintenance_processing} đang mở`;
+            }
         }
     } catch(e) { console.error("Stats Error", e); }
 
-    // 2. Load Chart (Biểu đồ)
+    // 2. Load Chart (Biểu đồ doanh thu năm - 12 tháng, hiển thị số tiền trên đầu cột)
     try {
         const res = await fetch(`${API_URL}/dashboard/chart`);
-        const chartData = await res.json();
-        
-        const chartContainer = document.querySelector('.chart-container');
-        const chartLabels = document.querySelector('.chart-labels');
-        
-        // Xóa dữ liệu mẫu cũ (trừ grid lines)
-        const gridLines = chartContainer.querySelector('.chart-grid-lines').outerHTML;
-        chartContainer.innerHTML = gridLines; 
-        chartLabels.innerHTML = '';
+        const chartData = await res.json(); // [{ month: 1..12, total }, ...]
 
-        // Tìm giá trị lớn nhất để tính chiều cao %
-        const maxVal = Math.max(...chartData.map(d => parseInt(d.total))) || 1;
+        const barGroups = document.querySelectorAll('.revenue-bar-group');
+        if (!barGroups.length) {
+            // Không có layout mới, bỏ qua phần chart
+            throw new Error('Không tìm thấy phần tử .revenue-bar-group trong DOM');
+        }
 
+        // Tạo map tháng -> tổng
+        const monthTotals = {};
         chartData.forEach(item => {
-            const heightPercent = (item.total / maxVal) * 80; // Max height 80% container
-            
-            // Tạo cột
-            const bar = document.createElement('div');
-            bar.className = 'chart-bar blue'; // Có thể logic đổi màu nếu là tháng hiện tại
-            bar.style.height = `${heightPercent}%`;
-            bar.style.width = '10%'; // Độ rộng cột
-            bar.innerHTML = `<div class="chart-tooltip">${(item.total / 1000000).toFixed(1)}M</div>`;
-            chartContainer.appendChild(bar);
+            monthTotals[item.month] = Number(item.total) || 0;
+        });
 
-            // Tạo nhãn tháng
-            const label = document.createElement('span');
-            label.innerText = item.month_year.split('/')[0]; // Lấy tháng
-            chartLabels.appendChild(label);
+        // Tìm max để tính chiều cao tương đối
+        const allTotals = Object.values(monthTotals);
+        const maxVal = allTotals.length ? Math.max(...allTotals, 0) : 0;
+
+        barGroups.forEach((group, idx) => {
+            const month = idx + 1; // theo thứ tự T1..T12
+            const total = monthTotals[month] || 0;
+
+            const bar = group.querySelector('.revenue-bar');
+            const amountSpan = group.querySelector('.revenue-bar-amount');
+
+            if (bar) {
+                let heightPercent = 0;
+                if (maxVal > 0) {
+                    heightPercent = (total / maxVal) * 80; // max ~80% chiều cao
+                }
+                bar.style.height = `${heightPercent}%`;
+            }
+
+            if (amountSpan) {
+                if (total > 0) {
+                    // Hiển thị dạng "45.2tr"
+                    amountSpan.textContent = (total / 1000000).toFixed(1) + 'tr';
+                } else {
+                    amountSpan.textContent = '';
+                }
+            }
         });
 
     } catch(e) { console.error("Chart Error", e); }
@@ -87,28 +100,54 @@ async function loadDashboard() {
         const res = await fetch(`${API_URL}/dashboard/upcoming-payments`);
         const payments = await res.json();
         const list = document.querySelector('.payment-list');
+        if (!list) {
+            console.warn('Không tìm thấy .payment-list');
+            return;
+        }
         list.innerHTML = '';
+
+        if (payments.length === 0) {
+            list.innerHTML = '<p class="text-gray-500 text-sm text-center py-4">Không có khoản thanh toán nào sắp tới hạn</p>';
+            return;
+        }
 
         payments.forEach(p => {
             const date = new Date(p.due_date);
             const dayMonth = `${date.getDate()}/${date.getMonth()+1}`;
             
-            // Random màu icon cho đẹp
             const colors = ['blue', 'indigo', 'sky', 'purple'];
             const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            const today = new Date();
+            const dueDate = new Date(p.due_date);
+            const daysDiff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+            let statusText = 'Sắp tới hạn';
+            let statusClass = 'text-orange-500';
+            if (daysDiff < 0) {
+                statusText = 'Quá hạn';
+                statusClass = 'text-red-500';
+            } else if (daysDiff > 7) {
+                statusText = 'Đang chờ';
+                statusClass = 'text-red-500';
+            }
 
             const html = `
-            <div class="payment-item">
-                <div class="payment-room ${color}">P${p.room_number}</div>
-                <div class="payment-details">
-                    <p class="payment-name">${p.full_name}</p>
-                    <p class="payment-date">
-                        <span class="material-icons-outlined payment-date-icon">schedule</span> ${dayMonth}
-                    </p>
+            <div class="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 font-bold text-xs flex items-center justify-center">
+                        P${p.room_number}
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-800 dark:text-white">${p.full_name}</h4>
+                        <p class="text-xs text-gray-500 flex items-center mt-0.5">
+                            <span class="material-icons-outlined w-3 h-3 mr-1 !text-[14px]">schedule</span>
+                            Đến hạn: ${dayMonth}
+                        </p>
+                    </div>
                 </div>
-                <div class="payment-amount">
-                    <p class="payment-amount-value ${color}">${parseInt(p.total_amount).toLocaleString('vi-VN')}</p>
-                    <p class="payment-status danger">Chưa thu</p>
+                <div class="text-right">
+                    <p class="text-sm font-bold text-blue-600 dark:text-blue-400">${parseInt(p.total_amount).toLocaleString('vi-VN')}</p>
+                    <p class="text-[10px] ${statusClass} font-medium">${statusText}</p>
                 </div>
             </div>`;
             list.innerHTML += html;
@@ -120,36 +159,51 @@ async function loadDashboard() {
         const res = await fetch(`${API_URL}/dashboard/activities`);
         const activities = await res.json();
         const actList = document.querySelector('.activity-list');
+        if (!actList) {
+            console.warn('Không tìm thấy .activity-list');
+            return;
+        }
         actList.innerHTML = '';
+
+        if (activities.length === 0) {
+            actList.innerHTML = '<p class="text-gray-500 text-sm text-center py-4">Không có hoạt động gần đây</p>';
+            return;
+        }
 
         activities.forEach(act => {
             let icon = 'notifications';
-            let color = 'blue';
+            let colorClass = 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
             let title = 'Thông báo';
             let desc = '';
 
             if(act.type === 'payment') {
-                icon = 'attach_money'; color = 'green'; title = 'Đã nhận thanh toán';
-                desc = `${formatMoney(act.val)} - ${act.full_name} (P.${act.room_number})`;
+                icon = 'attach_money'; 
+                colorClass = 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400';
+                title = 'Đã Nhận thanh toán';
+                desc = `${act.full_name} - Phòng ${act.room_number}`;
             } else if (act.type === 'maintenance') {
-                icon = 'build'; color = 'orange'; title = 'Yêu cầu bảo trì mới';
-                desc = `${act.val} - P.${act.room_number}`;
+                icon = 'build'; 
+                colorClass = 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400';
+                title = 'Yêu cầu bảo trì mới';
+                desc = `${act.val || 'Yêu cầu bảo trì'} - Phòng ${act.room_number}`;
             } else if (act.type === 'tenant') {
-                icon = 'person_add'; color = 'teal'; title = 'Người thuê mới';
-                desc = `${act.full_name} - P.${act.room_number}`;
+                icon = 'group'; 
+                colorClass = 'bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400';
+                title = 'Người thuê mới đã nhập';
+                desc = `${act.full_name} - Phòng ${act.room_number}`;
             }
 
             const html = `
-            <div class="activity-item">
-                <div class="activity-icon ${color}">
+            <div class="flex gap-4">
+                <div class="w-10 h-10 rounded-xl ${colorClass} flex-shrink-0 flex items-center justify-center">
                     <span class="material-icons-outlined">${icon}</span>
                 </div>
-                <div class="activity-content">
-                    <div class="activity-header">
-                        <h4 class="activity-title">${title}</h4>
-                        <span class="activity-time">${timeAgo(act.created_at)}</span>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <h4 class="text-sm font-semibold text-gray-800 dark:text-white">${title}</h4>
+                        <span class="text-xs text-gray-400">${timeAgo(act.created_at)}</span>
                     </div>
-                    <p class="activity-desc">${desc}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${desc}</p>
                 </div>
             </div>`;
             actList.innerHTML += html;
@@ -194,6 +248,60 @@ async function loadDashboard() {
     } catch(e) { console.error("Property Error", e); }
 }
 
+// Load mức sử dụng điện/nước
+async function loadUsageChart(type = 'electricity') {
+    try {
+        const res = await fetch(`${API_URL}/dashboard/usage?type=${type}`);
+        const data = await res.json();
+        
+        const titleEl = document.querySelector('.usage-chart-title');
+        const svgPath = document.querySelector('#usage-chart-path');
+        const svgGradient = document.querySelector('#usage-chart-gradient');
+        
+        if (titleEl) {
+            titleEl.textContent = type === 'electricity' 
+                ? 'Mức sử dụng Điện (kWh)' 
+                : 'Mức sử dụng Nước (m³)';
+        }
+        
+        // Cập nhật biểu đồ đường (có thể dùng Chart.js hoặc SVG như hiện tại)
+        // Tạm thời giữ nguyên SVG mẫu, có thể cải thiện sau
+        
+    } catch(e) { 
+        console.error("Usage Chart Error", e); 
+    }
+}
+
+// Toggle điện/nước
+function initUsageToggle() {
+    const btnElectricity = document.getElementById('btn-electricity');
+    const btnWater = document.getElementById('btn-water');
+    
+    if (!btnElectricity || !btnWater) return;
+    
+    [btnElectricity, btnWater].forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.dataset.type;
+            
+            // Update button styles
+            [btnElectricity, btnWater].forEach(b => {
+                b.classList.remove('active', 'bg-white', 'dark:bg-gray-600', 'text-orange-500', 'shadow-sm');
+                b.classList.add('text-gray-500', 'dark:text-gray-400');
+            });
+            
+            this.classList.add('active', 'bg-white', 'dark:bg-gray-600', 'text-orange-500', 'shadow-sm');
+            this.classList.remove('text-gray-500', 'dark:text-gray-400');
+            
+            // Load chart data
+            loadUsageChart(type);
+        });
+    });
+}
+
 // Chạy khi trang load xong
-document.addEventListener('DOMContentLoaded', loadDashboard);
+document.addEventListener('DOMContentLoaded', () => {
+    loadDashboard();
+    initUsageToggle();
+    loadUsageChart('electricity'); // Load mặc định điện
+});
 

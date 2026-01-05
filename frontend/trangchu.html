@@ -12,42 +12,25 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: "#009688", // Teal/Green from screenshot
-                        secondary: "#1e3a8a", // Sidebar Blue
-                        "background-light": "#F3F4F6",
-                        "background-dark": "#111827",
-                        "card-light": "#ffffff",
-                        "card-dark": "#1f2937",
-                        "text-light": "#1f2937",
-                        "text-dark": "#f3f4f6",
-                        "muted-light": "#6b7280",
-                        "muted-dark": "#9ca3af",
+                        primary: "#009688", // Teal color from the active menu
+                        "background-light": "#f3f4f6", // Light gray background
+                        "background-dark": "#111827", // Dark blue/gray background
+                        "sidebar-bg": "#1e3a8a", // Deep blue for sidebar
+                        "sidebar-bg-dark": "#0f172a",
                     },
                     fontFamily: {
                         display: ["Inter", "sans-serif"],
-                        body: ["Inter", "sans-serif"],
                     },
                     borderRadius: {
                         DEFAULT: "0.5rem",
-                        'xl': '1rem',
-                        '2xl': '1.5rem',
+                        'xl': "0.75rem",
+                        '2xl': "1rem",
+                        '3xl': "1.5rem",
                     },
                 },
             },
         };
     </script>
-<style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
 <link rel="stylesheet" href="css/trangchu.css"/>
 </head>
 <body>
@@ -107,110 +90,176 @@
 </a>
 </div>
 </aside>
-<main class="main-content">
-<div class="content-wrapper">
-<header class="page-header">
+<main class="main-content bg-background-light dark:bg-background-dark p-6 md:p-10 transition-colors duration-200">
+<header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
 <div>
-<h2 class="page-title">Tổng quan</h2>
-<p class="page-subtitle">Chào mừng trở lại, Admin</p>
+<h2 class="text-3xl font-bold text-gray-800 dark:text-white">Tổng quan</h2>
+<p class="text-gray-500 dark:text-gray-400 mt-1">Chào mừng trở lại, Admin</p>
 </div>
-<div class="date-section">
-<p class="date-label">Hôm nay</p>
-<p class="date-value">Chủ nhật, 14 tháng 12, 2025</p>
+<div class="text-right">
+<p class="text-sm text-gray-500 dark:text-gray-400">Hôm nay</p>
+<p class="text-base font-semibold text-blue-900 dark:text-blue-300">Chủ nhật, 14 tháng 12, 2025</p>
 </div>
 </header>
-<div class="stats-grid">
-<div class="stat-card">
-<div class="stat-header">
-<div class="stat-icon blue">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-700 dark:text-blue-300">
 <span class="material-icons-outlined">home</span>
 </div>
-<span class="stat-badge positive">
-<span class="material-icons-outlined stat-badge-icon">trending_up</span> +2
+<span class="flex items-center text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-lg text-xs font-semibold">
+<span class="material-icons-outlined text-[14px] mr-1">trending_up</span>
++2
 </span>
 </div>
-<p class="stat-label">Tổng Bất động sản</p>
-<h3 class="stat-value">12</h3>
+<h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Tổng Bất động sản</h3>
+<p class="text-4xl font-bold text-gray-800 dark:text-white stat-value">12</p>
 </div>
-<div class="stat-card">
-<div class="stat-header">
-<div class="stat-icon teal">
-<span class="material-icons-outlined">people</span>
-</div>
-<span class="stat-badge positive">
-<span class="material-icons-outlined stat-badge-icon">trending_up</span> 87%
-</span>
-</div>
-<p class="stat-label">Tỷ lệ lấp đầy</p>
-<h3 class="stat-value">87%</h3>
-<p class="stat-note">21 trên 24 phòng đã thuê</p>
-</div>
-<div class="stat-card">
-<div class="stat-header">
-<div class="stat-icon green">
+<div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center text-green-600 dark:text-green-300">
 <span class="material-icons-outlined">attach_money</span>
 </div>
-<span class="stat-badge positive">
-<span class="material-icons-outlined stat-badge-icon">trending_up</span> +12.5%
+<span class="flex items-center text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-lg text-xs font-semibold">
+<span class="material-icons-outlined text-[14px] mr-1">trending_up</span>
++12.5%
 </span>
 </div>
-<p class="stat-label">Doanh thu hàng tháng</p>
-<h3 class="stat-value tight">45.200.000 đ</h3>
-<p class="stat-note">so với 40.177.000 đ tháng trước</p>
+<h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Doanh thu hàng tháng</h3>
+<p class="text-3xl font-bold text-gray-800 dark:text-white mb-1 stat-value">45.200.000 đ</p>
+<p class="text-xs text-gray-400 dark:text-gray-500 stat-note">so với 40.177.000 đ tháng trước</p>
 </div>
-<div class="stat-card">
-<div class="stat-header">
-<div class="stat-icon orange">
+<div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center text-orange-600 dark:text-orange-300">
 <span class="material-icons-outlined">build</span>
 </div>
-<span class="stat-badge negative">
-<span class="material-icons-outlined stat-badge-icon">schedule</span> 8 Đang mở
+<span class="flex items-center text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-lg text-xs font-semibold">
+<span class="material-icons-outlined text-[14px] mr-1">schedule</span>
+8 Đang mở
 </span>
 </div>
-<p class="stat-label">Yêu cầu bảo trì</p>
-<h3 class="stat-value">13</h3>
-<p class="stat-note">5 đang xử lý, 8 đang mở</p>
+<h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">Yêu cầu bảo trì</h3>
+<p class="text-4xl font-bold text-gray-800 dark:text-white mb-1 stat-value">13</p>
+<p class="text-xs text-gray-400 dark:text-gray-500 stat-note">5 đang xử lý, 8 đang mở</p>
 </div>
 </div>
-<div class="charts-grid">
-<div class="chart-card wide">
-<div class="chart-header">
-<div>
-<h3 class="chart-title">Tổng quan doanh thu</h3>
-<p class="chart-subtitle">Doanh thu hàng tháng trong 6 tháng qua</p>
-</div>
-<div>
-<div class="chart-placeholder"></div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+<div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold text-gray-800 dark:text-white">Doanh thu Năm 2024</h3>
+<div class="flex items-center text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600">
+2024
+<span class="material-icons-outlined w-4 h-4 ml-2 !text-[16px]">event</span>
 </div>
 </div>
-<div class="chart-container">
-<div class="chart-grid-lines">
-<div class="chart-grid-line"></div>
-<div class="chart-grid-line"></div>
-<div class="chart-grid-line"></div>
-<div class="chart-grid-line"></div>
-<div class="chart-grid-line"></div>
+<div class="h-64 flex items-end justify-between space-x-2 text-xs text-gray-400">
+<div class="absolute left-10 md:left-14 top-[24rem] h-52 flex flex-col justify-between items-end pr-2 text-[10px] hidden md:flex">
+<span>60tr</span>
+<span>45tr</span>
+<span>30tr</span>
+<span>15tr</span>
+<span>0tr</span>
 </div>
-<div class="chart-bar blue h40">
-<div class="chart-tooltip">30M</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="1">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T1</span>
 </div>
-<div class="chart-bar blue h55">
-<div class="chart-tooltip">38M</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="2">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T2</span>
 </div>
-<div class="chart-bar blue h45">
-<div class="chart-tooltip">35M</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="3">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T3</span>
 </div>
-<div class="chart-bar blue h70">
-<div class="chart-tooltip">48M</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="4">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T4</span>
 </div>
-<div class="chart-bar blue h60">
-<div class="chart-tooltip">42M</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="5">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T5</span>
 </div>
-<div class="chart-bar primary h80">
-<div class="chart-tooltip">55M</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="6">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T6</span>
+</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="7">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T7</span>
+</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="8">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T8</span>
+</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="9">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T9</span>
+</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="10">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T10</span>
+</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="11">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T11</span>
+</div>
+<div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer revenue-bar-group" data-month="12">
+<span class="text-[10px] font-semibold mb-1 text-gray-700 dark:text-gray-200 revenue-bar-amount"></span>
+<div class="w-full bg-[#1e3a8a] dark:bg-blue-600 rounded-t-sm opacity-90 group-hover:opacity-100 transition-all revenue-bar"></div>
+<span class="mt-2 text-[10px]">T12</span>
 </div>
 </div>
-<div class="chart-labels">
+</div>
+<div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors relative overflow-hidden">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold text-gray-800 dark:text-white usage-chart-title">Mức sử dụng Điện (kWh)</h3>
+<div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1 text-xs font-medium">
+<button id="btn-electricity" class="px-3 py-1 bg-white dark:bg-gray-600 text-orange-500 shadow-sm rounded-md flex items-center usage-toggle-btn active" data-type="electricity">
+<span class="material-icons-outlined w-3 h-3 mr-1 !text-[14px]">bolt</span>
+Điện
+</button>
+<button id="btn-water" class="px-3 py-1 text-gray-500 dark:text-gray-400 flex items-center usage-toggle-btn" data-type="water">
+<span class="material-icons-outlined w-3 h-3 mr-1 !text-[14px]">water_drop</span>
+Nước
+</button>
+</div>
+</div>
+<div class="h-64 relative">
+<div class="absolute inset-0 flex flex-col justify-between text-[10px] text-gray-400 pointer-events-none">
+<div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full h-0 flex items-end"><span>1400</span></div>
+<div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full h-0 flex items-end"><span>1050</span></div>
+<div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full h-0 flex items-end"><span>700</span></div>
+<div class="border-b border-dashed border-gray-200 dark:border-gray-700 w-full h-0 flex items-end"><span>350</span></div>
+<div class="border-b border-gray-200 dark:border-gray-700 w-full h-0 flex items-end"><span>0</span></div>
+</div>
+<svg class="absolute inset-0 h-full w-full pt-6 pb-6" preserveAspectRatio="none" viewBox="0 0 400 200">
+<defs>
+<linearGradient id="gradientOrange" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#fdba74;stop-opacity:0.4"></stop>
+<stop offset="100%" style="stop-color:#fff7ed;stop-opacity:0"></stop>
+</linearGradient>
+<linearGradient id="gradientBlue" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.4"></stop>
+<stop offset="100%" style="stop-color:#eff6ff;stop-opacity:0"></stop>
+</linearGradient>
+</defs>
+<path id="usage-chart-gradient" class="text-orange-100" d="M0,50 C50,20 100,20 150,60 C200,100 250,20 300,40 C350,60 400,70 400,70 V200 H0 Z" fill="url(#gradientOrange)"></path>
+<path id="usage-chart-path" d="M0,50 C50,20 100,20 150,60 C200,100 250,20 300,40 C350,60 400,70 400,70" fill="none" stroke="#fb923c" stroke-width="3"></path>
+</svg>
+<div class="absolute bottom-0 w-full flex justify-between text-[10px] text-gray-400 px-2">
 <span>T7</span>
 <span>T8</span>
 <span>T9</span>
@@ -218,227 +267,28 @@
 <span>T11</span>
 <span>T12</span>
 </div>
-<div class="chart-footer">
-<div class="chart-trend">
-<span class="material-icons-outlined chart-trend-icon">trending_up</span>
-+0%
-<span class="chart-trend-text">tăng so với kỳ trước</span>
 </div>
-<a class="chart-link" href="#">
-Xem Chi tiết <span class="material-icons-outlined chart-link-icon">arrow_forward</span>
-</a>
 </div>
 </div>
-<div class="chart-card">
-<div class="section-header">
-<h3 class="section-title">Khoản thanh toán tới</h3>
-<a class="link-primary" href="#">Xem tất cả</a>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold text-gray-800 dark:text-white">Hoạt động gần đây</h3>
+<a class="text-primary hover:underline text-sm font-medium" href="#">Xem Tất cả</a>
 </div>
-<div class="payment-list">
-<div class="payment-item">
-<div class="payment-room blue">P301</div>
-<div class="payment-details">
-<p class="payment-name">Nguyễn Văn A</p>
-<p class="payment-date">
-<span class="material-icons-outlined payment-date-icon">schedule</span> 15/12
-</p>
+<div class="space-y-6 activity-list">
 </div>
-<div class="payment-amount">
-<p class="payment-amount-value blue">4.500.000</p>
-<p class="payment-status danger">Sắp tới hạn</p>
 </div>
+<div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-bold text-gray-800 dark:text-white">Khoản thanh toán tới hạn</h3>
+<a class="text-blue-600 hover:underline text-sm font-medium" href="#">Xem tất cả</a>
 </div>
-<div class="payment-item">
-<div class="payment-room indigo">P102</div>
-<div class="payment-details">
-<p class="payment-name">Trần Thị B</p>
-<p class="payment-date">
-<span class="material-icons-outlined payment-date-icon">schedule</span> 16/12
-</p>
+<div class="space-y-4 payment-list">
 </div>
-<div class="payment-amount">
-<p class="payment-amount-value indigo">3.800.000</p>
-<p class="payment-status danger">Sắp tới hạn</p>
 </div>
 </div>
-<div class="payment-item">
-<div class="payment-room blue">P205</div>
-<div class="payment-details">
-<p class="payment-name">Lê Văn C</p>
-<p class="payment-date">
-<span class="material-icons-outlined payment-date-icon">schedule</span> 18/12
-</p>
-</div>
-<div class="payment-amount">
-<p class="payment-amount-value blue">5.200.000</p>
-<p class="payment-status danger">Sắp tới hạn</p>
-</div>
-</div>
-<div class="payment-item">
-<div class="payment-room sky">P404</div>
-<div class="payment-details">
-<p class="payment-name">Phạm Thị D</p>
-<p class="payment-date">
-<span class="material-icons-outlined payment-date-icon">schedule</span> 20/12
-</p>
-</div>
-<div class="payment-amount">
-<p class="payment-amount-value sky">4.200.000</p>
-<p class="payment-status warning">Đang chờ</p>
-</div>
-</div>
-<div class="payment-item">
-<div class="payment-room purple">P105</div>
-<div class="payment-details">
-<p class="payment-name">Hoàng Văn E</p>
-<p class="payment-date">
-<span class="material-icons-outlined payment-date-icon">schedule</span> 21/12
-</p>
-</div>
-<div class="payment-amount">
-<p class="payment-amount-value purple">3.500.000</p>
-<p class="payment-status warning">Đang chờ</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="two-col-grid">
-<div class="chart-card">
-<div class="section-header">
-<h3 class="section-title">Hoạt động gần đây</h3>
-<a class="link-primary" href="#">Xem Tất cả</a>
-</div>
-<div class="activity-list">
-<div class="activity-item">
-<div class="activity-icon green">
-<span class="material-icons-outlined">attach_money</span>
-</div>
-<div class="activity-content">
-<div class="activity-header">
-<h4 class="activity-title">Đã Nhận thanh toán</h4>
-<span class="activity-time">2 giờ trước</span>
-</div>
-<p class="activity-desc">Nguyễn Thị Mai - Căn hộ 204</p>
-</div>
-</div>
-<div class="activity-item">
-<div class="activity-icon orange">
-<span class="material-icons-outlined">build</span>
-</div>
-<div class="activity-content">
-<div class="activity-header">
-<h4 class="activity-title">Yêu cầu bảo trì mới</h4>
-<span class="activity-time">5 giờ trước</span>
-</div>
-<p class="activity-desc">Rò rỉ nước - Phòng 305A</p>
-</div>
-</div>
-<div class="activity-item">
-<div class="activity-icon teal">
-<span class="material-icons-outlined">person_add</span>
-</div>
-<div class="activity-content">
-<div class="activity-header">
-<h4 class="activity-title">Người thuê mới đã nhập</h4>
-<span class="activity-time">1 ngày trước</span>
-</div>
-<p class="activity-desc">Trần Văn B - Phòng 305A</p>
-</div>
-</div>
-<div class="activity-item">
-<div class="activity-icon blue">
-<span class="material-icons-outlined">event</span>
-</div>
-<div class="activity-content">
-<div class="activity-header">
-<h4 class="activity-title">Hợp đồng sắp hết hạn</h4>
-<span class="activity-time">2 ngày trước</span>
-</div>
-<p class="activity-desc">Phạm Thị D - Còn 45 ngày</p>
-</div>
-</div>
-</div>
-</div>
-<div class="chart-card">
-<div class="section-header">
-<h3 class="section-title">Bất động sản hàng đầu</h3>
-<a class="link-primary" href="#">Xem Tất cả</a>
-</div>
-<div class="property-list">
-<div class="property-card">
-<div class="property-header">
-<h4 class="property-name">Khu A - Sunrise Heights</h4>
-<span class="material-icons-outlined property-trend up">trending_up</span>
-</div>
-<div class="property-stats">
-<div>
-<p class="property-stat-label">Phòng</p>
-<p class="property-stat-value">24</p>
-</div>
-<div>
-<p class="property-stat-label">Đã thuê</p>
-<p class="property-stat-value primary">21/24</p>
-</div>
-<div class="property-stat-value right">
-<p class="property-stat-label">Doanh thu</p>
-<p class="property-stat-value blue">18.2tr</p>
-</div>
-</div>
-<div class="property-progress">
-<div class="property-progress-bar progress-87-5"></div>
-</div>
-</div>
-<div class="property-card">
-<div class="property-header">
-<h4 class="property-name">Khu B - Maple Court</h4>
-<span class="material-icons-outlined property-trend up">trending_up</span>
-</div>
-<div class="property-stats">
-<div>
-<p class="property-stat-label">Phòng</p>
-<p class="property-stat-value">18</p>
-</div>
-<div>
-<p class="property-stat-label">Đã thuê</p>
-<p class="property-stat-value primary">16/18</p>
-</div>
-<div class="property-stat-value right">
-<p class="property-stat-label">Doanh thu</p>
-<p class="property-stat-value blue">14.4tr</p>
-</div>
-</div>
-<div class="property-progress">
-<div class="property-progress-bar progress-88"></div>
-</div>
-</div>
-<div class="property-card">
-<div class="property-header">
-<h4 class="property-name">Khu C - Oak Avenue</h4>
-<span class="material-icons-outlined property-trend down">trending_down</span>
-</div>
-<div class="property-stats">
-<div>
-<p class="property-stat-label">Phòng</p>
-<p class="property-stat-value">12</p>
-</div>
-<div>
-<p class="property-stat-label">Đã thuê</p>
-<p class="property-stat-value primary">10/12</p>
-</div>
-<div class="property-stat-value right">
-<p class="property-stat-label">Doanh thu</p>
-<p class="property-stat-value blue">9.8tr</p>
-</div>
-</div>
-<div class="property-progress">
-<div class="property-progress-bar progress-83"></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
+<div class="h-10"></div>
 </main>
 </div>
 
