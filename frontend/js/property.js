@@ -100,8 +100,17 @@
 
         // Gọi API lấy dịch vụ chung của nhà này
         try {
-            const res = await fetch(`${API_URL}/house-services/${currentHouseId}`);
-            const services = await res.json();
+            const houseId = parseInt(currentHouseId);
+            if (isNaN(houseId) || houseId <= 0) {
+                throw new Error('ID nhà trọ không hợp lệ');
+            }
+            
+            const res = await fetch(`${API_URL}/houses/${houseId}`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            const house = await res.json();
+            const services = house.services || [];
 
             if (services.length > 0) {
                 // Nếu nhà có dịch vụ chung, hiển thị chúng (Kế thừa)
@@ -115,8 +124,9 @@
             }
         } catch (err) {
             console.error("Lỗi load dịch vụ chung:", err);
-            // Fallback nếu lỗi
-            container.insertAdjacentHTML('beforeend', createServiceRowHtml());
+            // Fallback nếu lỗi - tạo 2 dòng mẫu
+            container.insertAdjacentHTML('beforeend', createServiceRowHtml('Điện', 'Theo số (kWh/khối)', '3500'));
+            container.insertAdjacentHTML('beforeend', createServiceRowHtml('Nước', 'Theo người', '100000'));
         }
 
         openModal('modal-room');
@@ -128,14 +138,19 @@
     // Load thống kê Dashboard
     async function loadStats() {
         try {
-            const res = await fetch(`${API_URL}/stats`);
+            const res = await fetch(`${API_URL}/houses/stats`);
             const data = await res.json();
             document.getElementById('stat-total').innerText = data.total_rooms || 0;
             document.getElementById('stat-occupied').innerText = data.occupied || 0;
             document.getElementById('stat-vacant').innerText = data.vacant || 0;
-            document.getElementById('stat-revenue').innerText = formatCurrency(data.revenue);
+            document.getElementById('stat-revenue').innerText = formatCurrency(data.revenue || 0);
         } catch (err) {
             console.error("Lỗi load stats:", err);
+            // Hiển thị 0 nếu có lỗi
+            document.getElementById('stat-total').innerText = '0';
+            document.getElementById('stat-occupied').innerText = '0';
+            document.getElementById('stat-vacant').innerText = '0';
+            document.getElementById('stat-revenue').innerText = '0 đ';
         }
     }
 
@@ -556,7 +571,16 @@
         isEditMode = false;
         
         try {
-            const res = await fetch(`${API_URL}/rooms/${roomId}`);
+            // Đảm bảo roomId là số nguyên hợp lệ
+            const id = parseInt(roomId);
+            if (isNaN(id) || id <= 0) {
+                throw new Error('ID phòng không hợp lệ');
+            }
+            
+            const res = await fetch(`${API_URL}/rooms/${id}`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
             const room = await res.json();
             
             // Điền thông tin phòng
@@ -715,7 +739,16 @@
         isHouseEditMode = false;
         
         try {
-            const res = await fetch(`${API_URL}/houses/${currentHouseId}`);
+            // Đảm bảo currentHouseId là số nguyên hợp lệ
+            const houseId = parseInt(currentHouseId);
+            if (isNaN(houseId) || houseId <= 0) {
+                throw new Error('ID nhà trọ không hợp lệ');
+            }
+            
+            const res = await fetch(`${API_URL}/houses/${houseId}`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
             const house = await res.json();
             
             // Điền thông tin nhà trọ

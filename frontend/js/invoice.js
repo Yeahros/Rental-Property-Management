@@ -28,7 +28,10 @@
 
     async function loadStats() {
         try {
-            const res = await fetch(`${API_URL}/invoice-stats`);
+            const res = await fetch(`${API_URL}/invoices/stats`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
             const data = await res.json();
             
             // Cập nhật UI Dashboard (Dựa vào vị trí thẻ trong HTML của bạn)
@@ -41,7 +44,10 @@
 
     async function loadActiveContracts() {
         try {
-            const res = await fetch(`${API_URL}/contracts-active`);
+            const res = await fetch(`${API_URL}/contracts/active`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
             const contracts = await res.json();
             
             const select = document.querySelector('.modal-header select'); // Select box chọn phòng

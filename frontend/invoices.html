@@ -406,13 +406,22 @@
         // --- LOAD DATA ---
         async function loadStats() {
             try {
-                const res = await fetch(`${API_URL}/invoice-stats`);
+                const res = await fetch(`${API_URL}/invoices/stats`);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
                 const data = await res.json();
                 
                 document.getElementById('stat-revenue').innerText = formatCurrency(data.revenue_month) + ' đ';
                 document.getElementById('stat-pending').innerText = formatCurrency(data.pending_amount) + ' đ';
                 document.getElementById('stat-overdue').innerText = data.overdue_count;
-            } catch (e) { console.error("Lỗi load stats:", e); }
+            } catch (e) { 
+                console.error("Lỗi load stats:", e);
+                // Hiển thị 0 nếu có lỗi
+                document.getElementById('stat-revenue').innerText = '0 đ';
+                document.getElementById('stat-pending').innerText = '0 đ';
+                document.getElementById('stat-overdue').innerText = '0';
+            }
         }
     
         async function loadInvoices() {
@@ -472,7 +481,10 @@
     
         async function loadActiveContracts() {
             try {
-                const res = await fetch(`${API_URL}/contracts-active`);
+                const res = await fetch(`${API_URL}/contracts/active`);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
                 const contracts = await res.json();
                 
                 const select = document.getElementById('contractSelect');
@@ -484,7 +496,10 @@
                     option.text = `P.${c.room_number} - ${c.full_name}`;
                     select.appendChild(option);
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error("Lỗi load active contracts:", e);
+                // Giữ nguyên select với option mặc định
+            }
         }
     
         // --- LOGIC CHỌN PHÒNG & LẤY GIÁ DỊCH VỤ ĐỘNG ---
@@ -493,8 +508,11 @@
             if (!contractId) return;
     
             try {
-                // Gọi API lấy chi tiết giá của phòng này
-                const res = await fetch(`${API_URL}/contract-details/${contractId}`);
+                // Gọi API lấy chi tiết hợp đồng (bao gồm dịch vụ)
+                const res = await fetch(`${API_URL}/contracts/${contractId}`);
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
                 const data = await res.json();
     
                 // 1. Điền giá thuê phòng

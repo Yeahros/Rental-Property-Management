@@ -57,14 +57,23 @@
     // --- 1. LOGIC THỐNG KÊ (MỚI) ---
     async function loadContractStats() {
         try {
-            const res = await fetch(`${API_URL}/contract-stats`);
+            const res = await fetch(`${API_URL}/contracts/stats`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
             const data = await res.json();
             
             // Gán dữ liệu vào các thẻ HTML có ID tương ứng
             document.getElementById('stat-active').innerText = data.active || 0;
             document.getElementById('stat-terminated').innerText = data.terminated || 0;
             document.getElementById('stat-expired').innerText = data.expired || 0;
-        } catch (err) { console.error("Lỗi load stats:", err); }
+        } catch (err) { 
+            console.error("Lỗi load stats:", err);
+            // Hiển thị 0 nếu có lỗi
+            document.getElementById('stat-active').innerText = '0';
+            document.getElementById('stat-terminated').innerText = '0';
+            document.getElementById('stat-expired').innerText = '0';
+        }
     }
 
     // --- 2. LOGIC LOAD PHÒNG VÀO DROPDOWN (MỚI) ---

@@ -33,7 +33,7 @@ const getContractById = async (req, res) => {
         const [rows] = await pool.execute(`
             SELECT c.*, 
                    t.full_name, t.phone, t.email, t.id_card_number, t.plain_password,
-                   r.room_number, r.house_id
+                   r.room_number, r.house_id, r.base_rent
             FROM contracts c
             JOIN tenants t ON c.tenant_id = t.tenant_id
             JOIN rooms r ON c.room_id = r.room_id
@@ -41,9 +41,36 @@ const getContractById = async (req, res) => {
         `, [req.params.id]);
 
         if (rows.length === 0) return res.status(404).json({ message: "Không tìm thấy hợp đồng" });
-        res.json(rows[0]);
+        
+        const contract = rows[0];
+        
+        // Lấy dịch vụ của phòng (room_services) hoặc dịch vụ chung của nhà (house_services)
+        const [roomServices] = await pool.query(`
+            SELECT s.service_name, s.service_type, rs.price as unit_price
+            FROM room_services rs
+            JOIN services s ON rs.service_id = s.service_id
+            WHERE rs.room_id = ?
+        `, [contract.room_id]);
+        
+        // Nếu phòng không có dịch vụ riêng, lấy dịch vụ chung của nhà
+        let services = roomServices;
+        if (services.length === 0) {
+            const [houseServices] = await pool.query(`
+                SELECT s.service_name, s.service_type, hs.price as unit_price
+                FROM house_services hs
+                JOIN services s ON hs.service_id = s.service_id
+                WHERE hs.house_id = ?
+            `, [contract.house_id]);
+            services = houseServices;
+        }
+        
+        contract.services = services || [];
+        contract.rent_amount = contract.rent_amount || contract.base_rent || 0;
+        
+        res.json(contract);
     } catch (err) {
-        res.status(500).send(err);
+        console.error('Get Contract By ID Error:', err);
+        res.status(500).json({ message: 'Lỗi khi lấy chi tiết hợp đồng', error: err.message });
     }
 };
 

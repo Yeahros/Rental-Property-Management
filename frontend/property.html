@@ -79,11 +79,11 @@
 
             <!-- Danh sách nhà trọ với nhà trọ được chọn ở đầu -->
             <div class="houses-section" style="margin-bottom: 1.5rem; background: white; border-radius: 1.5rem; border: 1px solid #e5e7eb; padding: 1.5rem 2rem; position: relative;">
-                <div style="display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f3f4f6;">
-                    <div style="display: flex; align-items: flex-start; gap: 2rem; flex: 1; overflow-x: auto; width: 100%;">
+                <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f3f4f6;">
+                    <div style="display: flex; align-items: flex-start; gap: 2rem; flex: 1; overflow-x: hidden; width: 100%; position: relative;">
                         <div style="display: flex; gap: 1rem; min-width: max-content;">
                             <!-- Nhà trọ được chọn (card lớn) -->
-                            <div id="active-house-card" class="active-house-card" style="display: none; min-width: max-content;">
+                            <div id="active-house-card" class="active-house-card" onclick="viewHouseDetail()" style="display: none; min-width: max-content; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
                                 <div style="display: flex; align-items: start; gap: 2rem;">
                                     <div class="house-icon-large" style="width: 64px; height: 64px; background: #DBEAFE; border-radius: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                         <i class="fas fa-home" style="font-size: 2.5rem; color: #1D4ED8;"></i>
@@ -104,9 +104,6 @@
                                                         </div>
                                                     </td>
                                                     <td style="padding: 0.5rem 0; white-space: nowrap; text-align: right;">
-                                                        <button class="btn-secondary" onclick="viewHouseDetail()" style="background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s;">
-                                                            Xem thêm
-                                                        </button>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -120,16 +117,18 @@
                                 <span style="padding: 10px; color: gray; font-size: 0.875rem;">Đang tải danh sách nhà...</span>
                             </div>
                         </div>
+                        
+                        <!-- Nút mũi tên chuyển trang nhà trọ -->
+                        <button id="houses-nav-next-btn" class="houses-nav-btn" onclick="nextHousesPage()" style="display: none; background: transparent; border: none; cursor: pointer; color: #1D4ED8; transition: all 0.2s; position: absolute; right: 0; top: 50%; transform: translateY(-50%);">
+                            <i class="fas fa-chevron-circle-right" style="font-size: 2rem;"></i>
+                        </button>
                     </div>
                     
-                    <!-- Nút Thêm Phòng và mũi tên ở góc phải -->
-                    <div style="display: flex; align-items: center; gap: 1rem; width: 100%; justify-content: flex-end;">
-                        <button class="btn-add-room-top" onclick="checkAndOpenRoomModal()" style="background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s;">
+                    <!-- Nút Thêm Phòng độc lập ở bên phải -->
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; flex-shrink: 0;">
+                        <button class="btn-add-room-top" onclick="checkAndOpenRoomModal()" style="background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.625rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s; white-space: nowrap;" onmouseover="this.style.boxShadow='0 2px 6px rgba(0,0,0,0.15)';" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)';">
                             <i class="fas fa-plus" style="color: #059669; font-size: 1rem;"></i>
                             <span style="color: #059669; font-size: 0.875rem; font-weight: 500;">Thêm Phòng</span>
-                        </button>
-                        <button id="houses-nav-next-btn" class="houses-nav-btn" onclick="nextHousesPage()" style="display: none; background: transparent; border: none; cursor: pointer; color: #1D4ED8; transition: all 0.2s;">
-                            <i class="fas fa-chevron-circle-right" style="font-size: 2rem;"></i>
                         </button>
                     </div>
                 </div>

@@ -42,6 +42,40 @@ const getHouses = async (req, res) => {
     }
 };
 
+// Lấy chi tiết một nhà trọ theo ID
+const getHouseById = async (req, res) => {
+    try {
+        const houseId = req.params.id;
+        
+        // Lấy thông tin nhà trọ
+        const [houses] = await pool.query(
+            'SELECT * FROM boarding_houses WHERE house_id = ?',
+            [houseId]
+        );
+        
+        if (houses.length === 0) {
+            return res.status(404).json({ message: 'Không tìm thấy nhà trọ' });
+        }
+        
+        const house = houses[0];
+        
+        // Lấy dịch vụ của nhà trọ
+        const [services] = await pool.query(`
+            SELECT s.service_name as name, s.service_type as type, hs.price
+            FROM house_services hs
+            JOIN services s ON hs.service_id = s.service_id
+            WHERE hs.house_id = ?
+        `, [houseId]);
+        
+        house.services = services || [];
+        
+        res.json(house);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Lỗi khi lấy chi tiết nhà trọ', error: err.message });
+    }
+};
+
 // Lấy doanh thu tháng của một nhà trọ
 const getHouseRevenue = async (req, res) => {
     try {
@@ -78,6 +112,7 @@ const createHouse = async (req, res) => {
 module.exports = {
     getStats,
     getHouses,
+    getHouseById,
     getHouseRevenue,
     createHouse
 };

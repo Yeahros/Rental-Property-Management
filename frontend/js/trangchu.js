@@ -213,45 +213,62 @@ async function loadDashboard() {
     // 5. Load Top Properties
     try {
         const res = await fetch(`${API_URL}/dashboard/top-properties`);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const props = await res.json();
         const propList = document.querySelector('.property-list');
+        if (!propList) {
+            console.warn('Không tìm thấy .property-list');
+            return;
+        }
         propList.innerHTML = '';
 
-        props.forEach(p => {
-            const percent = Math.round((p.occupied_rooms / p.total_rooms) * 100) || 0;
-            const html = `
-            <div class="property-card">
-                <div class="property-header">
-                    <h4 class="property-name">${p.house_name}</h4>
-                    <span class="material-icons-outlined property-trend up">trending_up</span>
-                </div>
-                <div class="property-stats">
-                    <div>
-                        <p class="property-stat-label">Phòng</p>
-                        <p class="property-stat-value">${p.total_rooms}</p>
+        if (props && props.length > 0) {
+            props.forEach(p => {
+                const totalRooms = p.total_rooms || 0;
+                const occupiedRooms = p.occupied_rooms || 0;
+                const percent = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
+                const html = `
+                <div class="property-card">
+                    <div class="property-header">
+                        <h4 class="property-name">${p.house_name || 'Chưa có tên'}</h4>
+                        <span class="material-icons-outlined property-trend up">trending_up</span>
                     </div>
-                    <div>
-                        <p class="property-stat-label">Đã thuê</p>
-                        <p class="property-stat-value primary">${p.occupied_rooms}/${p.total_rooms}</p>
+                    <div class="property-stats">
+                        <div>
+                            <p class="property-stat-label">Phòng</p>
+                            <p class="property-stat-value">${totalRooms}</p>
+                        </div>
+                        <div>
+                            <p class="property-stat-label">Đã thuê</p>
+                            <p class="property-stat-value primary">${occupiedRooms}/${totalRooms}</p>
+                        </div>
+                        <div class="property-stat-value right">
+                            <p class="property-stat-label">Doanh thu</p>
+                            <p class="property-stat-value blue">${((p.estimated_revenue || 0) / 1000000).toFixed(1)}tr</p>
+                        </div>
                     </div>
-                    <div class="property-stat-value right">
-                        <p class="property-stat-label">Doanh thu</p>
-                        <p class="property-stat-value blue">${(p.estimated_revenue / 1000000).toFixed(1)}tr</p>
+                    <div class="property-progress">
+                        <div class="property-progress-bar" style="width: ${percent}%"></div>
                     </div>
-                </div>
-                <div class="property-progress">
-                    <div class="property-progress-bar" style="width: ${percent}%"></div>
-                </div>
-            </div>`;
-            propList.innerHTML += html;
-        });
-    } catch(e) { console.error("Property Error", e); }
+                </div>`;
+                propList.innerHTML += html;
+            });
+        }
+    } catch(e) { 
+        console.error("Property Error", e);
+        // Không crash, chỉ log lỗi
+    }
 }
 
 // Load mức sử dụng điện/nước
 async function loadUsageChart(type = 'electricity') {
     try {
         const res = await fetch(`${API_URL}/dashboard/usage?type=${type}`);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const data = await res.json();
         
         const titleEl = document.querySelector('.usage-chart-title');
@@ -268,7 +285,8 @@ async function loadUsageChart(type = 'electricity') {
         // Tạm thời giữ nguyên SVG mẫu, có thể cải thiện sau
         
     } catch(e) { 
-        console.error("Usage Chart Error", e); 
+        console.error("Usage Chart Error", e);
+        // Không crash, chỉ log lỗi
     }
 }
 

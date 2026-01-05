@@ -105,15 +105,11 @@ const createInvoice = async (req, res) => {
 
         if (items && items.length > 0) {
             for (const item of items) {
-                let serviceType = 'Other';
-                if (item.name.toLowerCase().includes('điện')) serviceType = 'Electricity';
-                else if (item.name.toLowerCase().includes('nước')) serviceType = 'Water';
-                else if (item.name.toLowerCase().includes('internet')) serviceType = 'Internet';
-
+                // Lưu ý: invoice_details không có cột service_type trong database thực tế
                 await connection.query(
-                    `INSERT INTO service_details (invoice_id, service_type, previous_reading, current_reading, unit_price, amount)
-                     VALUES (?, ?, ?, ?, ?, ?)`,
-                    [invoiceId, serviceType, item.old || null, item.new || null, item.price || 0, item.amount]
+                    `INSERT INTO invoice_details (invoice_id, previous_reading, current_reading, unit_price, amount)
+                     VALUES (?, ?, ?, ?, ?)`,
+                    [invoiceId, item.old || null, item.new || null, item.price || 0, item.amount]
                 );
             }
         }

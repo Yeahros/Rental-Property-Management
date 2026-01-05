@@ -121,7 +121,9 @@ const getDashboardActivities = async (req, res) => {
 const getTopProperties = async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT h.house_name, h.total_rooms,
+            SELECT 
+                h.house_name,
+                (SELECT COUNT(*) FROM rooms r WHERE r.house_id = h.house_id) as total_rooms,
                 (SELECT COUNT(*) FROM rooms r WHERE r.house_id = h.house_id AND r.status = 'Occupied') as occupied_rooms,
                 (SELECT COALESCE(SUM(r.base_rent), 0) FROM rooms r WHERE r.house_id = h.house_id AND r.status = 'Occupied') as estimated_revenue
             FROM boarding_houses h
@@ -129,30 +131,33 @@ const getTopProperties = async (req, res) => {
         `);
         res.json(rows);
     } catch (err) {
-        res.status(500).send(err.message);
+        console.error('Top Properties Error:', err);
+        res.status(500).json({ message: 'Lỗi khi lấy danh sách nhà trọ', error: err.message });
     }
 };
 
 // Mức sử dụng điện/nước (6 tháng gần nhất)
 const getUsageChart = async (req, res) => {
     try {
-        const { type } = req.query; // 'electricity' hoặc 'water'
-        const serviceType = type === 'water' ? 'Water' : 'Electricity';
+        // Lưu ý: Frontend vẫn gửi type='electricity' hoặc 'water' nhưng 
+        // invoice_details không có cột service_type trong database thực tế
+        // Nên hiện tại lấy tất cả dữ liệu sử dụng
+        // const { type } = req.query; // Giữ lại để tương thích với frontend
         
-        // Lấy dữ liệu từ service_details
+        // Lấy dữ liệu từ invoice_details
+        // Dùng alias 'total_usage' thay vì 'usage' vì 'usage' là từ khóa reserved trong MySQL
         const [rows] = await pool.query(`
             SELECT 
                 MONTH(i.issue_date) AS month,
-                SUM(GREATEST(sd.current_reading - COALESCE(sd.previous_reading, 0), 0)) AS usage
-            FROM service_details sd
-            JOIN invoices i ON sd.invoice_id = i.invoice_id
-            WHERE sd.service_type = ?
-              AND YEAR(i.issue_date) = YEAR(CURRENT_DATE())
-              AND sd.current_reading IS NOT NULL
+                SUM(GREATEST(id.current_reading - COALESCE(id.previous_reading, 0), 0)) AS total_usage
+            FROM invoice_details id
+            JOIN invoices i ON id.invoice_id = i.invoice_id
+            WHERE YEAR(i.issue_date) = YEAR(CURRENT_DATE())
+              AND id.current_reading IS NOT NULL
             GROUP BY MONTH(i.issue_date)
             ORDER BY MONTH(i.issue_date) DESC
             LIMIT 6
-        `, [serviceType]);
+        `);
         
         // Chuẩn hóa thành 6 tháng gần nhất (T7-T12)
         const months = [];
@@ -166,14 +171,14 @@ const getUsageChart = async (req, res) => {
             const data = rows.find(r => r.month === month);
             months.push({
                 month: month,
-                usage: data ? parseFloat(data.usage) || 0 : 0
+                usage: data ? parseFloat(data.total_usage) || 0 : 0
             });
         }
         
         res.json(months);
     } catch (err) {
         console.error('Usage Chart Error:', err);
-        res.status(500).send(err.message);
+        res.status(500).json({ message: 'Lỗi khi lấy dữ liệu sử dụng', error: err.message });
     }
 };
 
