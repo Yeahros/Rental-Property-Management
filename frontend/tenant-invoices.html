@@ -1,0 +1,166 @@
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lịch sử Hóa đơn - StayEasy</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#00bfa5", // Teal color
+              secondary: "#1a237e", // Deep blue
+              "background-light": "#f8fafc",
+              "background-dark": "#0f172a",
+              "card-light": "#ffffff",
+              "card-dark": "#1e293b",
+              "text-main-light": "#1f2937",
+              "text-main-dark": "#f3f4f6",
+              "text-sub-light": "#6b7280",
+              "text-sub-dark": "#9ca3af",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.75rem", // 12px
+              xl: "1rem", // 16px
+            },
+          },
+        },
+      };
+    </script>
+</head><body class="bg-background-light dark:bg-background-dark font-sans text-text-main-light dark:text-text-main-dark antialiased h-screen flex overflow-hidden">
+<aside class="w-64 bg-secondary dark:bg-[#0a0f2c] text-white flex flex-col flex-shrink-0 transition-colors duration-300">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-white/10 p-2 rounded-lg">
+<span class="material-icons-outlined text-white">home</span>
+</div>
+<div>
+<h1 class="font-bold text-xl leading-none">TroViet</h1>
+<p class="text-xs text-blue-200">Cổng Người thuê</p>
+</div>
+</div>
+<div class="px-6 py-4 border-b border-blue-800/50">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
+<span class="material-icons-outlined">person</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium truncate">Nguyễn Thị Mai</p>
+<p class="text-xs text-blue-200 truncate">mai.nguyen@email.com</p>
+</div>
+<span class="material-icons-outlined text-blue-200 text-sm cursor-pointer">notifications</span>
+</div>
+</div>
+<nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all" href="tenant-trangchu.html">
+<span class="material-icons-outlined">dashboard</span>
+<span class="font-medium">Tổng quan</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary rounded-lg text-white shadow-md transition-all" href="tenant-invoices.html">
+<span class="material-icons-outlined">receipt_long</span>
+<span class="font-medium">Hóa đơn</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all" href="tenant-maintenance.html">
+<span class="material-icons-outlined">build</span>
+<span class="font-medium">Bảo trì</span>
+</a>
+</nav>
+<div class="p-4 space-y-2 border-t border-blue-800/50">
+<a class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all" href="#">
+<span class="material-icons-outlined">settings</span>
+<span class="font-medium">Cài đặt</span>
+</a>
+<a id="logout-btn" class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all cursor-pointer" href="#">
+<span class="material-icons-outlined">logout</span>
+<span class="font-medium">Đăng xuất</span>
+</a>
+</div>
+</aside>
+<main class="flex-1 overflow-y-auto p-6 lg:p-8">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
+<div class="lg:col-span-9 flex flex-col h-full">
+<header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+<div>
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white">Danh sách Hóa đơn</h2>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative">
+<span class="material-icons-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg">search</span>
+<input class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64 bg-white dark:bg-card-dark dark:border-gray-700 dark:text-gray-200" placeholder="Tìm kiếm hóa đơn..." type="text"/>
+</div>
+<button class="p-2 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 dark:bg-card-dark dark:border-gray-700 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400">
+<span class="material-icons-outlined text-lg">filter_list</span>
+</button>
+</div>
+</header>
+<div id="invoice-list" class="flex-1 space-y-4"></div>
+</div>
+<div class="lg:col-span-3 space-y-6">
+<div class="bg-white dark:bg-card-dark rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+<div class="absolute -right-6 -top-6 w-24 h-24 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+<span class="material-icons-outlined text-green-200 dark:text-green-800 text-6xl">check_circle</span>
+</div>
+<div class="flex items-start justify-between mb-4 relative z-10">
+<div class="w-10 h-10 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-icons-outlined">trending_up</span>
+</div>
+<span class="text-[10px] font-bold bg-green-100 text-green-700 px-2 py-1 rounded-full">+2% so với T11</span>
+</div>
+<div class="relative z-10">
+<h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">25.5tr</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400">Tổng đã chi (Năm 2024)</p>
+</div>
+</div>
+<div class="bg-white dark:bg-card-dark rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group">
+<div class="absolute -right-4 -bottom-4 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-500">
+<span class="material-icons text-9xl text-orange-500">receipt</span>
+</div>
+<div class="flex items-start justify-between mb-4 relative z-10">
+<div class="w-10 h-10 rounded-lg bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-icons-outlined">account_balance_wallet</span>
+</div>
+</div>
+<div class="relative z-10">
+<h3 class="text-3xl font-bold text-gray-900 dark:text-white mb-1">2.0tr</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400">Dư nợ hiện tại</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+
+<div id="invoice-detail-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white dark:bg-card-dark rounded-xl shadow-2xl w-full max-w-3xl p-6 relative">
+    <button class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 dark:text-gray-300" onclick="toggleInvoiceDetail(false)">
+      <span class="material-icons-outlined">close</span>
+    </button>
+    <div class="mb-4">
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Chi tiết hóa đơn</h3>
+      <p id="detail-room" class="text-sm text-gray-500 dark:text-gray-400"></p>
+      <p id="detail-period" class="text-sm text-gray-500 dark:text-gray-400"></p>
+      <p id="detail-status" class="text-sm font-medium mt-2"></p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700 dark:text-gray-200 mb-4">
+      <div><span class="text-gray-500 dark:text-gray-400">Số tiền:</span> <span id="detail-amount" class="font-semibold"></span></div>
+      <div><span class="text-gray-500 dark:text-gray-400">Ngày phát hành:</span> <span id="detail-issue"></span></div>
+      <div><span class="text-gray-500 dark:text-gray-400">Hạn thanh toán:</span> <span id="detail-due"></span></div>
+    </div>
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+      <h4 class="font-semibold mb-2 text-gray-900 dark:text-white">Các khoản phí</h4>
+      <div id="detail-items" class="space-y-2 text-sm text-gray-800 dark:text-gray-200"></div>
+    </div>
+    <div class="mt-4 text-right">
+      <button class="px-4 py-2 bg-primary text-white rounded-lg" onclick="toggleInvoiceDetail(false)">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/tenant-invoices.js"></script>
+</body></html>

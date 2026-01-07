@@ -96,16 +96,118 @@ const getHouseRevenue = async (req, res) => {
 
 // Tạo Nhà trọ mới
 const createHouse = async (req, res) => {
-    const { name, address, description, landlord_id } = req.body;
+    const { name, address, description, landlord_id, services } = req.body;
     const ownerId = landlord_id || 1;
+    const connection = await pool.getConnection();
 
     try {
+        await connection.beginTransaction();
+
+        // 1. Tạo nhà trọ mới
         const sql = 'INSERT INTO boarding_houses (landlord_id, house_name, address, description, total_rooms) VALUES (?, ?, ?, ?, 0)';
-        const [result] = await pool.execute(sql, [ownerId, name, address, description]);
-        res.json({ message: 'Tạo nhà thành công', id: result.insertId });
+        const [result] = await connection.query(sql, [ownerId, name, address, description]);
+        const houseId = result.insertId;
+
+        // 2. Thêm dịch vụ cho nhà trọ nếu có
+        if (services && Array.isArray(services) && services.length > 0) {
+            for (const svc of services) {
+                if (svc.name && svc.price) {
+                    // Tìm hoặc tạo service
+                    let [serviceRows] = await connection.query(
+                        'SELECT service_id FROM services WHERE service_name = ? AND service_type = ?',
+                        [svc.name, svc.type || 'Theo số (kWh/khối)']
+                    );
+
+                    let serviceId;
+                    if (serviceRows.length === 0) {
+                        // Tạo service mới nếu chưa có
+                        const [insertResult] = await connection.query(
+                            'INSERT INTO services (service_name, service_type) VALUES (?, ?)',
+                            [svc.name, svc.type || 'Theo số (kWh/khối)']
+                        );
+                        serviceId = insertResult.insertId;
+                    } else {
+                        serviceId = serviceRows[0].service_id;
+                    }
+
+                    // Thêm vào house_services
+                    await connection.query(
+                        'INSERT INTO house_services (house_id, service_id, price) VALUES (?, ?, ?)',
+                        [houseId, serviceId, svc.price]
+                    );
+                }
+            }
+        }
+
+        await connection.commit();
+        res.json({ message: 'Tạo nhà thành công', id: houseId });
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Lỗi khi tạo nhà');
+        await connection.rollback();
+        console.error('Create House Error:', err);
+        res.status(500).json({ message: 'Lỗi khi tạo nhà', error: err.message });
+    } finally {
+        connection.release();
+    }
+};
+
+// Cập nhật Nhà trọ
+const updateHouse = async (req, res) => {
+    const houseId = req.params.id;
+    const { name, address, description, services } = req.body;
+    const connection = await pool.getConnection();
+
+    try {
+        await connection.beginTransaction();
+
+        // 1. Cập nhật thông tin nhà trọ
+        await connection.query(`
+            UPDATE boarding_houses 
+            SET house_name = ?, address = ?, description = ?
+            WHERE house_id = ?
+        `, [name, address || null, description || null, houseId]);
+
+        // 2. Xóa tất cả dịch vụ cũ của nhà trọ
+        await connection.query('DELETE FROM house_services WHERE house_id = ?', [houseId]);
+
+        // 3. Thêm lại dịch vụ mới nếu có
+        if (services && Array.isArray(services) && services.length > 0) {
+            for (const svc of services) {
+                if (svc.name && svc.price) {
+                    // Tìm hoặc tạo service
+                    let [serviceRows] = await connection.query(
+                        'SELECT service_id FROM services WHERE service_name = ? AND service_type = ?',
+                        [svc.name, svc.type || 'Theo số (kWh/khối)']
+                    );
+
+                    let serviceId;
+                    if (serviceRows.length === 0) {
+                        // Tạo service mới nếu chưa có
+                        const [insertResult] = await connection.query(
+                            'INSERT INTO services (service_name, service_type) VALUES (?, ?)',
+                            [svc.name, svc.type || 'Theo số (kWh/khối)']
+                        );
+                        serviceId = insertResult.insertId;
+                    } else {
+                        serviceId = serviceRows[0].service_id;
+                    }
+
+                    // Thêm vào house_services
+                    await connection.query(
+                        'INSERT INTO house_services (house_id, service_id, price) VALUES (?, ?, ?)',
+                        [houseId, serviceId, svc.price]
+                    );
+                }
+            }
+        }
+
+        await connection.commit();
+        res.json({ message: 'Cập nhật nhà trọ thành công' });
+    } catch (err) {
+        await connection.rollback();
+        console.error('Update House Error:', err);
+        res.status(500).json({ message: 'Lỗi khi cập nhật nhà trọ', error: err.message });
+    } finally {
+        connection.release();
     }
 };
 
@@ -114,6 +216,7 @@ module.exports = {
     getHouses,
     getHouseById,
     getHouseRevenue,
-    createHouse
+    createHouse,
+    updateHouse
 };
 

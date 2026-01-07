@@ -763,9 +763,14 @@
         }
     
         async function deleteInvoice(id) {
+            const invoiceId = parseInt(id);
+            if (isNaN(invoiceId) || invoiceId <= 0) {
+                alert('ID hóa đơn không hợp lệ');
+                return;
+            }
             // Kiểm tra trạng thái hóa đơn trước khi xóa
             try {
-                const invoiceRes = await fetch(`${API_URL}/invoices/${id}`);
+                const invoiceRes = await fetch(`${API_URL}/invoices/${invoiceId}`);
                 if (!invoiceRes.ok) {
                     throw new Error('Không thể lấy thông tin hóa đơn');
                 }
@@ -783,7 +788,7 @@
                 }
                 
                 // Gửi yêu cầu xóa
-                const res = await fetch(`${API_URL}/invoices/${id}`, {
+                const res = await fetch(`${API_URL}/invoices/${invoiceId}`, {
                     method: 'DELETE',
                     headers: {'Content-Type': 'application/json'}
                 });

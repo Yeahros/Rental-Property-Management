@@ -66,6 +66,15 @@ const getContractById = async (req, res) => {
         
         contract.services = services || [];
         contract.rent_amount = contract.rent_amount || contract.base_rent || 0;
+
+        // Lấy danh sách thành viên phòng
+        const [members] = await pool.query(
+            `SELECT member_id, full_name, phone, id_card_number, cccd_front, cccd_back, created_at
+             FROM room_members
+             WHERE contract_id = ?`,
+            [contract.contract_id]
+        );
+        contract.members = members || [];
         
         res.json(contract);
     } catch (err) {
@@ -76,7 +85,7 @@ const getContractById = async (req, res) => {
 
 // Tạo Hợp đồng mới
 const createContract = async (req, res) => {
-    const { room_id, full_name, phone, id_card_number, start_date, end_date, deposit_amount, rent_amount, notes, password } = req.body;
+    const { room_id, full_name, phone, id_card_number, start_date, end_date, deposit_amount, rent_amount, notes, password, members } = req.body;
     const connection = await pool.getConnection();
 
     try {
@@ -128,13 +137,36 @@ const createContract = async (req, res) => {
         }
 
         // 4. Insert Hợp đồng
-        await connection.query(
+        const [contractResult] = await connection.query(
             `INSERT INTO contracts (room_id, tenant_id, start_date, end_date, deposit_amount, rent_amount, notes, contract_file_url, status, is_current)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Active', 1)`,
             [room_id, tenantId, start_date, end_date, deposit_amount, rent_amount, notes, pdfPath]
         );
+        const contractId = contractResult.insertId;
 
-        // 5. Update trạng thái phòng -> Occupied
+        // 5. Thêm thành viên phòng (nếu có)
+        let memberList = [];
+        if (members) {
+            try {
+                memberList = JSON.parse(members);
+            } catch (parseErr) {
+                console.error('Parse members error:', parseErr);
+            }
+        }
+
+        if (Array.isArray(memberList) && memberList.length > 0) {
+            for (const m of memberList) {
+                if (m.full_name) {
+                    await connection.query(
+                        `INSERT INTO room_members (contract_id, full_name, phone, id_card_number, cccd_front, cccd_back)
+                         VALUES (?, ?, ?, ?, ?, ?)`,
+                        [contractId, m.full_name, m.phone || null, m.id_card_number || null, m.cccd_front || null, m.cccd_back || null]
+                    );
+                }
+            }
+        }
+
+        // 6. Update trạng thái phòng -> Occupied
         await connection.query('UPDATE rooms SET status = "Occupied" WHERE room_id = ?', [room_id]);
 
         await connection.commit();

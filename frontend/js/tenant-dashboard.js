@@ -265,20 +265,33 @@ async function loadMonthlyExpenses() {
         
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         
-        const data = await res.json();
+        let data = await res.json();
+        if (!Array.isArray(data)) data = [];
         
         const container = document.getElementById('monthly-expenses-chart');
         if (!container) return;
-        
+
+        if (data.length === 0) {
+            container.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 w-full">Không có dữ liệu chi tiêu.</p>`;
+            return;
+        }
+
+        // Chuẩn hoá số
+        const normalized = data.map(d => ({
+            ...d,
+            total_expense: parseFloat(d.total_expense) || 0,
+        }));
+
         // Tìm max để tính chiều cao tương đối
-        const maxExpense = Math.max(...data.map(d => d.total_expense), 0);
+        const maxExpense = Math.max(...normalized.map(d => d.total_expense), 0);
         
-        container.innerHTML = data.map((expense, index) => {
+        container.innerHTML = normalized.map((expense) => {
             const heightPercent = maxExpense > 0 ? (expense.total_expense / maxExpense) * 100 : 0;
             return `
                 <div class="flex flex-col items-center gap-2 flex-1 group">
-                    <div class="w-full bg-purple-100 dark:bg-purple-900 rounded-t h-full relative overflow-hidden">
+                    <div class="w-full bg-purple-100 dark:bg-purple-900 rounded-t relative overflow-hidden" style="height: 140px;">
                         <div class="absolute bottom-0 w-full bg-purple-600 dark:bg-purple-500 rounded-t transition-all group-hover:opacity-80" style="height: ${heightPercent}%"></div>
+                        <div class="absolute top-1 left-1 right-1 text-[11px] text-gray-600 dark:text-gray-200 text-center opacity-0 group-hover:opacity-100 transition-opacity">${formatCurrency(expense.total_expense)} đ</div>
                     </div>
                     <span class="text-xs text-text-sub-light dark:text-text-sub-dark">${getMonthName(expense.month)}</span>
                 </div>

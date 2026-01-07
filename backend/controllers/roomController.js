@@ -38,6 +38,7 @@ const getRoomById = async (req, res) => {
                    t.full_name as tenant_name,
                    t.phone as tenant_phone,
                    t.email as tenant_email,
+                   c.contract_id as current_contract_id,
                    c.start_date as contract_start_date,
                    c.end_date as contract_end_date
             FROM rooms r
@@ -61,6 +62,19 @@ const getRoomById = async (req, res) => {
         `, [roomId]);
         
         room.services = services || [];
+
+        // Lấy thành viên phòng nếu có hợp đồng hiện tại
+        if (room.current_contract_id) {
+            const [members] = await pool.query(
+                `SELECT member_id, full_name, phone, id_card_number, cccd_front, cccd_back, created_at
+                 FROM room_members
+                 WHERE contract_id = ?`,
+                [room.current_contract_id]
+            );
+            room.members = members || [];
+        } else {
+            room.members = [];
+        }
         
         res.json(room);
     } catch (err) {
@@ -133,23 +147,60 @@ const updateRoom = async (req, res) => {
 
 // Tạo Phòng mới
 const createRoom = async (req, res) => {
-    const { house_id, room_number, floor, area, rent, facilities } = req.body;
+    const { house_id, room_number, floor, area, rent, facilities, services } = req.body;
 
     if (!house_id) return res.status(400).json({ message: "Cần chọn nhà trọ" });
 
+    const connection = await pool.getConnection();
     try {
+        await connection.beginTransaction();
+
+        // 1. Tạo phòng mới
         const sql = `INSERT INTO rooms (house_id, room_number, floor, area_m2, base_rent, facilities, status) 
                      VALUES (?, ?, ?, ?, ?, ?, 'Vacant')`;
 
-        const [result] = await pool.execute(sql, [house_id, room_number, floor, area, rent, facilities]);
+        const [result] = await connection.query(sql, [house_id, room_number, floor, area, rent, facilities]);
+        const roomId = result.insertId;
 
-        // Note: total_rooms column không tồn tại trong database, đã xóa dòng UPDATE này
-        // await pool.execute(`UPDATE boarding_houses SET total_rooms = total_rooms + 1 WHERE house_id = ?`, [house_id]);
+        // 2. Thêm dịch vụ cho phòng nếu có
+        if (services && Array.isArray(services) && services.length > 0) {
+            for (const svc of services) {
+                if (svc.name && svc.price) {
+                    // Tìm hoặc tạo service
+                    let [serviceRows] = await connection.query(
+                        'SELECT service_id FROM services WHERE service_name = ? AND service_type = ?',
+                        [svc.name, svc.type || 'Theo số (kWh/khối)']
+                    );
 
-        res.json({ message: 'Tạo phòng thành công', id: result.insertId });
+                    let serviceId;
+                    if (serviceRows.length === 0) {
+                        // Tạo service mới nếu chưa có
+                        const [insertResult] = await connection.query(
+                            'INSERT INTO services (service_name, service_type) VALUES (?, ?)',
+                            [svc.name, svc.type || 'Theo số (kWh/khối)']
+                        );
+                        serviceId = insertResult.insertId;
+                    } else {
+                        serviceId = serviceRows[0].service_id;
+                    }
+
+                    // Thêm vào room_services
+                    await connection.query(
+                        'INSERT INTO room_services (room_id, service_id, price) VALUES (?, ?, ?)',
+                        [roomId, serviceId, svc.price]
+                    );
+                }
+            }
+        }
+
+        await connection.commit();
+        res.json({ message: 'Tạo phòng thành công', id: roomId });
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Lỗi khi tạo phòng: ' + err.message);
+        await connection.rollback();
+        console.error('Create Room Error:', err);
+        res.status(500).json({ message: 'Lỗi khi tạo phòng', error: err.message });
+    } finally {
+        connection.release();
     }
 };
 

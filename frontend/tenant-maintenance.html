@@ -1,0 +1,168 @@
+<html lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Quản lý Bảo trì - StayEasy</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#00bfa5", // Teal color
+              secondary: "#1a237e", // Deep blue
+              "background-light": "#f8fafc",
+              "background-dark": "#0f172a",
+              "card-light": "#ffffff",
+              "card-dark": "#1e293b",
+              "text-main-light": "#1f2937",
+              "text-main-dark": "#f3f4f6",
+              "text-sub-light": "#6b7280",
+              "text-sub-dark": "#9ca3af",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+              sans: ["Inter", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.75rem", // 12px
+              xl: "1rem", // 16px
+            },
+          },
+        },
+      };
+    </script>
+</head><body class="bg-background-light dark:bg-background-dark font-sans text-text-main-light dark:text-text-main-dark antialiased h-screen flex overflow-hidden">
+<aside class="w-64 bg-secondary dark:bg-[#0a0f2c] text-white flex flex-col flex-shrink-0 transition-colors duration-300">
+<div class="p-6 flex items-center gap-3">
+<div class="bg-white/10 p-2 rounded-lg">
+<span class="material-icons-outlined text-white">home</span>
+</div>
+<div>
+<h1 class="font-bold text-xl leading-none">TroViet</h1>
+<p class="text-xs text-blue-200">Cổng Người thuê</p>
+</div>
+</div>
+<div class="px-6 py-4 border-b border-blue-800/50">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold">
+<span class="material-icons-outlined">person</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-medium truncate">Nguyễn Thị Mai</p>
+<p class="text-xs text-blue-200 truncate">mai.nguyen@email.com</p>
+</div>
+<span class="material-icons-outlined text-blue-200 text-sm cursor-pointer">notifications</span>
+</div>
+</div>
+<nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all" href="tenant-trangchu.html">
+<span class="material-icons-outlined">dashboard</span>
+<span class="font-medium">Tổng quan</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all" href="tenant-invoices.html">
+<span class="material-icons-outlined">receipt_long</span>
+<span class="font-medium">Hóa đơn</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary rounded-lg text-white shadow-md transition-all" href="tenant-maintenance.html">
+<span class="material-icons-outlined">build</span>
+<span class="font-medium">Bảo trì</span>
+</a>
+</nav>
+<div class="p-4 space-y-2 border-t border-blue-800/50">
+<a class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all" href="#">
+<span class="material-icons-outlined">settings</span>
+<span class="font-medium">Cài đặt</span>
+</a>
+<a id="logout-btn" class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all cursor-pointer" href="#">
+<span class="material-icons-outlined">logout</span>
+<span class="font-medium">Đăng xuất</span>
+</a>
+</div>
+</aside>
+<main class="flex-1 overflow-y-auto p-6 lg:p-8">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
+<div class="lg:col-span-9 flex flex-col gap-8">
+  <div>
+    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Yêu cầu của bạn</h2>
+    <div id="tenant-maintenance-list" class="space-y-4"></div>
+  </div>
+<div class="bg-white dark:bg-card-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+<div class="bg-blue-50/50 dark:bg-blue-900/10 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
+<div class="bg-blue-600 text-white p-1 rounded-md">
+<span class="material-icons-outlined text-lg">add</span>
+</div>
+<h3 class="font-bold text-gray-900 dark:text-white">Gửi yêu cầu mới</h3>
+</div>
+<div class="p-6 space-y-6">
+<div class="space-y-4">
+<div>
+<label class="block text-xs font-bold text-gray-500 uppercase mb-2">Tiêu đề vấn đề</label>
+<input id="inp-title" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary dark:bg-card-dark dark:border-gray-700 dark:text-white text-sm" placeholder="VD: Vòi nước bị rò rỉ trong bếp" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-gray-500 uppercase mb-2">Mô tả chi tiết</label>
+<textarea id="inp-description" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary dark:bg-card-dark dark:border-gray-700 dark:text-white text-sm h-32 resize-none" placeholder="Mô tả chi tiết vấn đề..."></textarea>
+</div>
+<div>
+<label class="block text-xs font-bold text-gray-500 uppercase mb-2">Vị trí / Phòng</label>
+<div class="relative">
+<select id="select-room" class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary dark:bg-card-dark dark:border-gray-700 dark:text-white text-sm appearance-none bg-none">
+  <option disabled selected value="">Chọn phòng...</option>
+</select>
+<span class="material-icons-outlined absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold text-gray-500 uppercase mb-2">Thêm hình ảnh (Tùy chọn)</label>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<button class="flex flex-col items-center justify-center p-8 border border-gray-200 rounded-xl hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors group">
+<div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-2 group-hover:bg-white group-hover:shadow-sm transition-all">
+<span class="material-icons-outlined text-gray-500">photo_camera</span>
+</div>
+<span class="text-sm text-gray-500 font-medium">Chụp ảnh</span>
+</button>
+<button class="flex flex-col items-center justify-center p-8 border border-gray-200 rounded-xl hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors group">
+<div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-2 group-hover:bg-white group-hover:shadow-sm transition-all">
+<span class="material-icons-outlined text-gray-500">file_upload</span>
+</div>
+<span class="text-sm text-gray-500 font-medium">Tải lên</span>
+</button>
+</div>
+</div>
+</div>
+<button onclick="submitMaintenanceRequest()" class="w-full bg-secondary hover:bg-blue-900 text-white font-semibold py-3 rounded-lg shadow-md transition-all flex items-center justify-center gap-2">
+                    Gửi yêu cầu
+                  </button>
+</div>
+</div>
+</div>
+<div class="lg:col-span-3">
+<div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800/30 sticky top-8">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-icons-outlined text-blue-600 dark:text-blue-400">info</span>
+<h3 class="font-bold text-blue-900 dark:text-blue-100 text-base">Mẹo gửi yêu cầu</h3>
+</div>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<div class="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+<p class="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">Mô tả chi tiết nhất có thể về vấn đề để chúng tôi có thể xử lý nhanh chóng.</p>
+</li>
+<li class="flex items-start gap-3">
+<div class="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+<p class="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">Kèm theo hình ảnh nếu có thể nhìn thấy lỗi giúp kỹ thuật viên chuẩn bị tốt hơn.</p>
+</li>
+<li class="flex items-start gap-3">
+<div class="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 flex-shrink-0"></div>
+<p class="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">Kiểm tra cập nhật trạng thái yêu cầu thường xuyên để biết tiến độ.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</main>
+<script src="js/tenant-maintenance.js"></script>
+</body></html>

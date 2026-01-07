@@ -27,7 +27,10 @@ function timeAgo(dateString) {
 // --- 1. LOAD THỐNG KÊ ---
 async function loadStats() {
     try {
-        const res = await fetch(`${API_URL}/maintenance-stats`);
+        const res = await fetch(`${API_URL}/maintenance/stats`);
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const data = await res.json();
         
         // Tìm các thẻ p hiển thị số liệu dựa trên cấu trúc HTML hiện tại
@@ -39,7 +42,17 @@ async function loadStats() {
             statsNumbers[2].innerText = data.completed || 0;    // Hoàn thành
             statsNumbers[3].innerText = data.cancelled || 0;    // Đã hủy
         }
-    } catch (e) { console.error("Lỗi stats:", e); }
+    } catch (e) { 
+        console.error("Lỗi stats:", e);
+        // Hiển thị 0 nếu có lỗi
+        const statsNumbers = document.querySelectorAll('.text-3xl.font-semibold');
+        if(statsNumbers.length >= 4) {
+            statsNumbers[0].innerText = '0';
+            statsNumbers[1].innerText = '0';
+            statsNumbers[2].innerText = '0';
+            statsNumbers[3].innerText = '0';
+        }
+    }
 }
 
 // --- 2. LOAD DANH SÁCH YÊU CẦU ---

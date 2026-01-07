@@ -59,15 +59,15 @@
 </div>
 </div>
 <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-<a class="flex items-center gap-3 px-4 py-3 bg-primary rounded-lg text-white shadow-md transition-all" href="#">
+<a class="flex items-center gap-3 px-4 py-3 bg-primary rounded-lg text-white shadow-md transition-all" href="tenant-trangchu.html">
 <span class="material-icons-outlined">dashboard</span>
 <span class="font-medium">Tổng quan</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all" href="tenant-invoices.html">
 <span class="material-icons-outlined">receipt_long</span>
 <span class="font-medium">Hóa đơn</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all" href="#">
+<a class="flex items-center gap-3 px-4 py-3 text-blue-100 hover:bg-white/10 rounded-lg transition-all" href="tenant-maintenance.html">
 <span class="material-icons-outlined">build</span>
 <span class="font-medium">Bảo trì</span>
 </a>
@@ -134,8 +134,9 @@
 </div>
 </div>
 </section>
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-<div class="lg:col-span-8 space-y-8">
+<!-- Div 1: Thanh toán và Yêu cầu bảo trì -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+<div class="lg:col-span-8">
 <div id="next-payment-card" class="bg-card-light dark:bg-card-dark rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
 <div class="flex justify-between items-start mb-4">
 <div>
@@ -162,6 +163,21 @@
 </div>
 </div>
 </div>
+</div>
+<div class="lg:col-span-4">
+<div class="bg-card-light dark:bg-card-dark rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-semibold text-secondary dark:text-blue-300">Yêu cầu Bảo trì của Tôi</h3>
+<a class="text-sm text-primary hover:underline" href="#">Xem Tất cả</a>
+</div>
+<div id="maintenance-requests-list" class="flex flex-col gap-4">
+<p class="text-center text-gray-500 py-4">Đang tải...</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Div 2: 2 Dashboard -->
 <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
 <div class="md:col-span-3 bg-card-light dark:bg-card-dark rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
 <div class="flex items-center gap-3 mb-6">
@@ -192,19 +208,6 @@
 <line stroke="#e5e7eb" stroke-dasharray="4" stroke-width="1" x1="0" x2="300" y1="100" y2="100"></line>
 <line stroke="#e5e7eb" stroke-dasharray="4" stroke-width="1" x1="0" x2="300" y1="50" y2="50"></line>
 </svg>
-</div>
-</div>
-</div>
-</div>
-<div class="lg:col-span-4">
-<div class="bg-card-light dark:bg-card-dark rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-<div class="flex items-center justify-between mb-6">
-<h3 class="text-lg font-semibold text-secondary dark:text-blue-300">Yêu cầu Bảo trì của Tôi</h3>
-<a class="text-sm text-primary hover:underline" href="#">Xem Tất cả</a>
-</div>
-<div id="maintenance-requests-list" class="flex flex-col gap-4">
-<p class="text-center text-gray-500 py-4">Đang tải...</p>
-</div>
 </div>
 </div>
 </div>

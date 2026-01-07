@@ -91,6 +91,17 @@ const createInvoice = async (req, res) => {
         room_rent
     } = req.body;
 
+    // Chuẩn hóa billing_period: nếu phát sinh (Incidental) mà không có, dùng tháng của due_date hoặc tháng hiện tại
+    let finalBillingPeriod = billing_period;
+    if (!finalBillingPeriod && due_date) {
+        // Lấy theo tháng của due_date (YYYY-MM) để phù hợp độ dài cột billing_period
+        finalBillingPeriod = new Date(due_date).toISOString().slice(0,7);
+    }
+    // Nếu vẫn null, dùng tháng hiện tại để tránh lỗi DB
+    if (!finalBillingPeriod) {
+        finalBillingPeriod = new Date().toISOString().slice(0,7);
+    }
+
     const connection = await pool.getConnection();
 
     try {
@@ -99,7 +110,7 @@ const createInvoice = async (req, res) => {
         const [invResult] = await connection.query(
             `INSERT INTO invoices (contract_id, billing_period, issue_date, due_date, room_rent, total_amount, status, notes, invoice_type)
              VALUES (?, ?, CURRENT_DATE(), ?, ?, ?, 'Unpaid', ?, ?)`,
-            [contract_id, billing_period || null, due_date, room_rent || 0, total_amount, notes, type]
+            [contract_id, finalBillingPeriod, due_date, room_rent || 0, total_amount, notes, type]
         );
         const invoiceId = invResult.insertId;
 
@@ -120,6 +131,10 @@ const createInvoice = async (req, res) => {
     } catch (err) {
         await connection.rollback();
         console.error(err);
+        // Bắt lỗi trùng key (duplicate billing_period/contract)
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ message: 'Đã tồn tại hóa đơn cho kỳ này. Vui lòng chọn kỳ khác.' });
+        }
         res.status(500).send('Lỗi tạo hóa đơn: ' + err.message);
     } finally {
         connection.release();
@@ -216,11 +231,43 @@ const getInvoiceById = async (req, res) => {
     }
 };
 
+// Xóa Hóa đơn (chỉ khi chưa thanh toán)
+const deleteInvoice = async (req, res) => {
+    const invoiceId = req.params.id;
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const [rows] = await connection.query(`SELECT status FROM invoices WHERE invoice_id = ?`, [invoiceId]);
+        if (rows.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ message: 'Không tìm thấy hóa đơn' });
+        }
+        if (rows[0].status === 'Paid') {
+            await connection.rollback();
+            return res.status(400).json({ message: 'Không thể xóa hóa đơn đã thanh toán' });
+        }
+
+        await connection.query(`DELETE FROM invoice_details WHERE invoice_id = ?`, [invoiceId]);
+        await connection.query(`DELETE FROM invoices WHERE invoice_id = ?`, [invoiceId]);
+
+        await connection.commit();
+        res.json({ message: 'Đã xóa hóa đơn' });
+    } catch (err) {
+        await connection.rollback();
+        console.error('Delete Invoice Error:', err);
+        res.status(500).json({ message: 'Lỗi khi xóa hóa đơn', error: err.message });
+    } finally {
+        connection.release();
+    }
+};
+
 module.exports = {
     getInvoiceStats,
     getInvoices,
     getInvoiceById,
     createInvoice,
-    updateInvoiceStatus
+    updateInvoiceStatus,
+    deleteInvoice
 };
 

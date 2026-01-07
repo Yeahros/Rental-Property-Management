@@ -302,8 +302,8 @@ async function loadUsageChart(type = 'electricity') {
         
         if (titleEl) {
             titleEl.textContent = type === 'electricity' 
-                ? 'Mức sử dụng Điện (kWh)' 
-                : 'Mức sử dụng Nước (m³)';
+                ? 'Mức sử dụng điện (kWh)' 
+                : 'Mức sử dụng nước (m³)';
         }
         
         if (!data || data.length === 0) {

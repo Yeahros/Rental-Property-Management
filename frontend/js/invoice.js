@@ -61,12 +61,18 @@
                 select.appendChild(option);
             });
 
-            // Sự kiện khi chọn phòng -> Tự điền giá thuê
+            // Sự kiện khi chọn phòng -> Tự điền giá thuê (chỉ áp dụng cho tab Hàng tháng)
             select.onchange = function() {
                 const rent = this.options[this.selectedIndex].getAttribute('data-rent');
                 if (rent) {
                     document.getElementById('roomPrice').value = rent; // Giá gốc ko format để tính toán
+                }
+                const isMonthly = document.getElementById('tab-monthly').classList.contains('active');
+                if (isMonthly) {
                     calculateTotal();
+                } else {
+                    // Ở tab phát sinh, giữ nguyên đơn giá người dùng nhập
+                    calcIncidental();
                 }
             };
         } catch (e) { console.error(e); }
@@ -82,6 +88,7 @@
             tbody.innerHTML = '';
 
             invoices.forEach(inv => {
+                const id = parseInt(inv.invoice_id) || 0;
                 let badgeHtml = '';
                 if (inv.display_status === 'Paid') {
                     badgeHtml = `<span class="badge badge-success"><span class="dot" style="background: #16a34a;"></span> Đã thanh toán</span>`;
@@ -92,7 +99,7 @@
                 }
 
                 const row = `
-                    <tr>
+                    <tr onclick="viewInvoiceDetail(${id})">
                         <td class="font-bold">P.${inv.room_number}</td>
                         <td>
                             <div class="user-info">
@@ -106,9 +113,9 @@
                         <td>${badgeHtml}</td>
                         <td class="text-right">
                              ${inv.display_status !== 'Paid' ? 
-                                `<button class="btn-icon" onclick="markPaid(${inv.invoice_id})" title="Xác nhận thanh toán"><span class="material-symbols-outlined" style="color:green">check_circle</span></button>` 
+                                `<button class="btn-icon" onclick="event.stopPropagation(); markPaid(${id});" title="Xác nhận thanh toán"><span class="material-symbols-outlined" style="color:green">check_circle</span></button>` 
                                 : ''}
-                            <button class="btn-icon delete"><span class="material-symbols-outlined">delete</span></button>
+                            <button class="btn-icon delete" onclick="event.stopPropagation(); deleteInvoice(${id});"><span class="material-symbols-outlined">delete</span></button>
                         </td>
                     </tr>
                 `;
@@ -207,7 +214,8 @@
             payload = {
                 type: 'Incidental',
                 contract_id: contractId,
-                billing_period: null, // Phát sinh ko nhất thiết theo kỳ
+                // Dùng kỳ theo tháng của dueDate hoặc period; fallback tháng hiện tại
+                billing_period: (dueDate && dueDate.slice(0,7)) || (period || new Date().toISOString().slice(0,7)),
                 due_date: dueDate,
                 room_rent: 0,
                 total_amount: amount,

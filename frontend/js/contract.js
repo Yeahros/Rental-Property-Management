@@ -1,6 +1,8 @@
 
     const API_URL = 'http://localhost:3000/api';
     let currentContractId = null;
+    let currentMembers = [];
+    let allowMemberEdit = true; // cho phép thêm/sửa thành viên (create mode hoặc edit mode)
 
     function previewImage(input, previewId, defaultId) {
         const file = input.files[0];
@@ -52,6 +54,96 @@
             case 'PartiallyPaid': return { text: 'Thanh toán một phần', class: 'warning' };
             default: return { text: 'Đúng hạn', class: 'ok' };
         }
+    }
+
+    // --- THÀNH VIÊN PHÒNG ---
+    function renderMembers(readOnly = false) {
+        const list = document.getElementById('member-list');
+        if (!list) return;
+        list.innerHTML = '';
+        if (!currentMembers || currentMembers.length === 0) {
+            list.innerHTML = '<span style="font-size:12px; color:#9ca3af;">Chưa có thành viên</span>';
+            return;
+        }
+        currentMembers.forEach((m, idx) => {
+            const initials = (m.full_name || '??').split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            const chip = document.createElement('div');
+            chip.className = 'member-chip';
+            chip.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:10px;background:#f9fafb;cursor:pointer;';
+            chip.innerHTML = `
+                <div style="width:34px;height:34px;border-radius:9999px;background:#e0f2fe;color:#0369a1;display:flex;align-items:center;justify-content:center;font-weight:700;">${initials}</div>
+                <div style="display:flex;flex-direction:column;line-height:1.3;">
+                    <span style="font-weight:600;color:#111827;">${m.full_name || 'Chưa rõ'}</span>
+                    <span style="font-size:12px;color:#6b7280;">${m.phone || ''}</span>
+                </div>
+            `;
+            chip.onclick = () => showMemberInfo(idx);
+            list.appendChild(chip);
+        });
+
+        // Khi ở chế độ xem (readOnly), không cho thêm thành viên trong modal chi tiết
+        const form = document.getElementById('member-form');
+        const btnShow = document.getElementById('btn-show-member-form');
+        if (form) form.style.display = 'none';
+        if (btnShow) btnShow.style.display = readOnly ? 'none' : 'inline-flex';
+    }
+
+    function clearMemberForm() {
+        ['member-name','member-phone','member-idcard','member-cccd-front','member-cccd-back'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+    }
+
+    function toggleMemberForm(show) {
+        if (show && !allowMemberEdit) return; // chặn mở form khi không được phép
+        const form = document.getElementById('member-form');
+        const btnShow = document.getElementById('btn-show-member-form');
+        const infoBox = document.getElementById('member-info');
+        if (form) form.style.display = show ? 'grid' : 'none';
+        if (btnShow) btnShow.style.display = show ? 'none' : 'inline-flex';
+        if (!show && infoBox) infoBox.style.display = 'none';
+        if (show) clearMemberForm();
+    }
+
+    function addMember() {
+        if (!allowMemberEdit) {
+            alert('Vui lòng bấm "Chỉnh sửa" để thêm thành viên.');
+            return;
+        }
+        const nameEl = document.getElementById('member-name');
+        if (!nameEl || !nameEl.value.trim()) {
+            alert('Vui lòng nhập họ tên thành viên');
+            return;
+        }
+        const newMember = {
+            full_name: nameEl.value.trim(),
+            phone: (document.getElementById('member-phone')?.value || '').trim(),
+            id_card_number: (document.getElementById('member-idcard')?.value || '').trim(),
+            cccd_front: (document.getElementById('member-cccd-front')?.value || '').trim(),
+            cccd_back: (document.getElementById('member-cccd-back')?.value || '').trim(),
+        };
+        currentMembers.push(newMember);
+        renderMembers(false);
+        toggleMemberForm(false);
+    }
+
+    function showMemberInfo(index) {
+        const infoBox = document.getElementById('member-info');
+        if (!infoBox || !currentMembers[index]) return;
+        const m = currentMembers[index];
+        infoBox.style.display = 'block';
+        infoBox.innerHTML = `
+            <div style="padding:10px;border:1px dashed #d1d5db;border-radius:10px;background:#f8fafc;">
+                <div style="font-weight:700;color:#111827;margin-bottom:6px;">${m.full_name}</div>
+                <div style="font-size:13px;color:#374151;line-height:1.5;">
+                    <div><strong>SĐT:</strong> ${m.phone || '---'}</div>
+                    <div><strong>CCCD/CMND:</strong> ${m.id_card_number || '---'}</div>
+                    <div><strong>Ảnh trước:</strong> ${m.cccd_front || '---'}</div>
+                    <div><strong>Ảnh sau:</strong> ${m.cccd_back || '---'}</div>
+                </div>
+            </div>
+        `;
     }
 
     // --- 1. LOGIC THỐNG KÊ (MỚI) ---
@@ -147,6 +239,12 @@
             document.querySelectorAll('.modal-body input, textarea').forEach(i => i.value = '');
             document.getElementById('select-room-id').value = "";
             document.getElementById('select-room-id').disabled = false;
+            currentMembers = [];
+            allowMemberEdit = true;
+            renderMembers(false);
+            toggleMemberForm(false);
+            const infoBox = document.getElementById('member-info');
+            if (infoBox) infoBox.style.display = 'none';
 
             // --- ĐÂY LÀ BƯỚC 4: THÊM ĐOẠN CODE NÀY VÀO ---
             
@@ -175,13 +273,22 @@
             title.innerText = 'Chi tiết Hợp đồng';
             btnCreate.style.display = 'none';
             btnsEdit.style.display = 'flex';
+            // Ở chế độ xem chi tiết, chỉ xem icon thành viên, không cho thêm
+            allowMemberEdit = false;
+            renderMembers(true);
+            toggleMemberForm(false);
         }
     }
 
     // --- 4. DATA LIST LOGIC ---
-    async function loadContracts(status = 'All') {
+    async function loadContracts(status = 'All', search = '') {
         try {
-            const res = await fetch(`${API_URL}/contracts?status=${status}`);
+            const params = new URLSearchParams();
+            if (status && status !== 'All') params.append('status', status);
+            if (search && search.trim() !== '') params.append('search', search.trim());
+            const query = params.toString();
+            const url = query ? `${API_URL}/contracts?${query}` : `${API_URL}/contracts`;
+            const res = await fetch(url);
             const contracts = await res.json();
             const container = document.querySelector('.tenant-list');
             container.innerHTML = '';
@@ -296,6 +403,7 @@
         formData.append('rent_amount', rentRaw.replace(/[^0-9]/g, ''));
         formData.append('notes', notes);
         formData.append('password', password);
+        formData.append('members', JSON.stringify(currentMembers || []));
 
         // File upload
         const fileFront = document.getElementById('file-cccd-front').files[0];
@@ -371,6 +479,12 @@
             document.getElementById('inp-rent').value = data.rent_amount;
             document.getElementById('inp-notes').value = data.notes || '';
             
+            // Thành viên
+            currentMembers = data.members || [];
+            renderMembers(true);
+            const infoBox = document.getElementById('member-info');
+            if (infoBox) infoBox.style.display = 'none';
+
             // Ban đầu disable tất cả input (chế độ xem)
             setEditMode(false);
     
@@ -411,6 +525,12 @@
                 }
             }
         });
+
+        // Toggle member form
+        allowMemberEdit = enabled;
+        renderMembers(!enabled);
+        const infoBox = document.getElementById('member-info');
+        if (!enabled && infoBox) infoBox.style.display = 'none';
     }
     
     // Lưu thay đổi
@@ -603,6 +723,54 @@
         loadContracts();
         loadContractStats(); // Gọi hàm thống kê khi load trang
         
+        // Search + filter
+        const searchInput = document.querySelector('.search-input');
+        const dropdown = document.getElementById('statusDropdown');
+        let currentStatus = 'All';
+
+        function applyFilter() {
+            const text = searchInput ? searchInput.value : '';
+            loadContracts(currentStatus, text);
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') applyFilter();
+            });
+        }
+
+        // Dropdown logic
+        if (dropdown) {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            const menu = dropdown.querySelector('.dropdown-menu');
+            const labelSpan = toggle.querySelector('span');
+
+            window.toggleDropdown = function() {
+                dropdown.classList.toggle('open');
+            };
+
+            menu.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    menu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    labelSpan.textContent = item.textContent;
+
+                    // Map text -> status param
+                    if (item.textContent.includes('Đang thuê')) currentStatus = 'Active';
+                    else if (item.textContent.includes('Chấm dứt')) currentStatus = 'Terminated';
+                    else if (item.textContent.includes('Hết hạn')) currentStatus = 'Expired';
+                    else currentStatus = 'All';
+
+                    dropdown.classList.remove('open');
+                    applyFilter();
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
+            });
+        }
+
         // Thêm event listener cho input số điện thoại
         const phoneInput = document.getElementById('inp-phone');
         if (phoneInput) {

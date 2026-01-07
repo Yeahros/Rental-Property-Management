@@ -619,6 +619,28 @@
                 } else {
                     document.getElementById('tenant-contract-detail').textContent = 'Hợp đồng: Chưa có thông tin';
                 }
+
+                // Hiển thị thành viên phòng (chỉ xem)
+                const memberWrap = document.getElementById('tenant-members');
+                const memberList = document.getElementById('tenant-member-list');
+                if (memberWrap && memberList) {
+                    memberList.innerHTML = '';
+                    if (room.members && room.members.length > 0) {
+                        memberWrap.style.display = 'block';
+                        room.members.forEach(m => {
+                            const initials = (m.full_name || '??').split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+                            const chip = document.createElement('div');
+                            chip.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;border:1px solid #e5e7eb;border-radius:10px;background:#f9fafb;min-width:80px;';
+                            chip.innerHTML = `
+                                <div style="width:36px;height:36px;border-radius:9999px;background:#e0f2fe;color:#0369a1;display:flex;align-items:center;justify-content:center;font-weight:700;">${initials}</div>
+                                <span style="font-size:12px;font-weight:600;color:#111827;text-align:center;">${m.full_name || '---'}</span>
+                            `;
+                            memberList.appendChild(chip);
+                        });
+                    } else {
+                        memberWrap.style.display = 'none';
+                    }
+                }
             } else {
                 tenantSection.style.display = 'none';
             }
@@ -906,6 +928,13 @@
     async function saveHouseDetail() {
         if (!currentHouseId) return alert("Lỗi: Không xác định được nhà trọ!");
         
+        // Đảm bảo currentHouseId là số nguyên hợp lệ
+        const houseId = parseInt(currentHouseId);
+        if (isNaN(houseId) || houseId <= 0) {
+            alert("Lỗi: ID nhà trọ không hợp lệ!");
+            return;
+        }
+        
         const name = document.getElementById('inp-house-detail-name').value;
         const address = document.getElementById('inp-house-detail-addr').value;
         const description = document.getElementById('inp-house-detail-desc').value;
@@ -923,27 +952,28 @@
         };
 
         try {
-            const res = await fetch(`${API_URL}/houses/${currentHouseId}`, {
+            const res = await fetch(`${API_URL}/houses/${houseId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`HTTP error! status: ${res.status}, message: ${errorText}`);
+            }
+            
             const data = await res.json();
 
-            if (res.ok) {
-                alert("Cập nhật nhà trọ thành công!");
-                setHouseEditMode(false);
-                isHouseEditMode = false;
-                loadHouses(); // Tải lại danh sách nhà để cập nhật thông tin
-                // Tải lại chi tiết nhà trọ để hiển thị dữ liệu mới
-                await viewHouseDetail();
-            } else {
-                alert("Lỗi: " + (data.message || "Không thể cập nhật nhà trọ"));
-            }
+            alert("Cập nhật nhà trọ thành công!");
+            setHouseEditMode(false);
+            isHouseEditMode = false;
+            loadHouses(); // Tải lại danh sách nhà để cập nhật thông tin
+            // Tải lại chi tiết nhà trọ để hiển thị dữ liệu mới
+            await viewHouseDetail();
         } catch (err) {
-            console.error(err);
-            alert("Lỗi khi cập nhật nhà trọ!");
+            console.error("Lỗi khi cập nhật nhà trọ:", err);
+            alert("Lỗi khi cập nhật nhà trọ: " + err.message);
         }
     }
 
